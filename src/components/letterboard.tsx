@@ -3,10 +3,12 @@
 import { useEffect } from 'react'
 import useLetterboardStore from '@/store/useLetterboardStore'
 import useAudioStore from '@/store/useAudioStore'
+import useTTSStore from '@/store/useTTSStore'
 
 export function Letterboard() {
   const { text, predictions, appendLetter, backspace, clear, selectPrediction } = useLetterboardStore()
   const { sendUserMessage } = useAudioStore()
+  const { speak, isLoading } = useTTSStore()
 
   const handleClick = (letter: string) => {
     appendLetter(letter)
@@ -18,10 +20,11 @@ export function Letterboard() {
       const words = text.trim().split(/\s+/)
       const lastWord = words[words.length - 1]
       if (lastWord) {
-        sendUserMessage(lastWord)
+        // sendUserMessage(lastWord)
+        speak(lastWord) // Use the new TTS functionality
       }
     }
-  }, [text, sendUserMessage])
+  }, [text, sendUserMessage, speak])
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">
@@ -85,6 +88,13 @@ export function Letterboard() {
           Clear
         </button>
       </div>
+      
+      {/* Add a loading spinner */}
+      {isLoading && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="spinner"></div>
+        </div>
+      )}
     </div>
   )
 }
