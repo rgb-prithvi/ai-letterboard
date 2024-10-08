@@ -19,25 +19,13 @@ To read more about using these font, please visit the Next.js documentation:
 **/
 "use client"
 
-import { useState } from "react"
+import useLetterboardStore from '../store/useLetterboardStore'
 
 export function Letterboard() {
-  const [text, setText] = useState("")
-  const handleClick = (letter) => {
-    if (letter === " ") {
-      setText((prevText) => prevText + " ")
-    } else {
-      setText((prevText) => prevText + letter)
-    }
-  }
+  const { text, appendLetter, backspace, clear } = useLetterboardStore()
 
-  // Add new functions for Backspace and Clear
-  const handleBackspace = () => {
-    setText((prevText) => prevText.slice(0, -1))
-  }
-
-  const handleClear = () => {
-    setText("")
+  const handleClick = (letter: string) => {
+    appendLetter(letter)
   }
 
   return (
@@ -72,13 +60,13 @@ export function Letterboard() {
           Space
         </button>
         <button
-          onClick={handleBackspace}
+          onClick={backspace}
           className="w-32 h-16 text-2xl font-bold rounded-lg bg-primary text-primary-foreground shadow-md hover:bg-primary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           Backspace
         </button>
         <button
-          onClick={handleClear}
+          onClick={clear}
           className="w-32 h-16 text-2xl font-bold rounded-lg bg-primary text-primary-foreground shadow-md hover:bg-primary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           Clear
