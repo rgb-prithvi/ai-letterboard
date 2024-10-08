@@ -1,7 +1,9 @@
-import { Letterboard } from "@/components/letterboard";
+import { LetterboardWithAudio } from '@/components/LetterboardWithAudio'
 
 export default function Home() {
   return (
-    <Letterboard />
-  );
+    <main>
+      <LetterboardWithAudio />
+    </main>
+  )
 }
