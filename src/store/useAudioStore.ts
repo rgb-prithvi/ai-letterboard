@@ -1,23 +1,29 @@
 import { create } from 'zustand';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 
-const SAMPLE_RATE = 24000; // Matching the sample rate from play-audio.js
+const SAMPLE_RATE = 24000;
+const DEBOUNCE_TIME = 200; 
 
 interface AudioStore {
   isPlaying: boolean;
   audioContext: AudioContext | null;
   realtimeClient: RealtimeClient | null;
+  audioBuffer: Record<string, number>;
+  audioTimeout: NodeJS.Timeout | null;
   initializeAudio: () => void;
   connectToRealtimeAPI: () => Promise<void>;
   disconnectFromRealtimeAPI: () => void;
   sendUserMessage: (text: string) => void;
   handleAudioData: (audioData: Record<string, number>) => void;
+  playAudioBuffer: () => void;
 }
 
 const useAudioStore = create<AudioStore>((set, get) => ({
   isPlaying: false,
   audioContext: null,
   realtimeClient: null,
+  audioBuffer: {},
+  audioTimeout: null,
 
   initializeAudio: () => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -31,7 +37,7 @@ const useAudioStore = create<AudioStore>((set, get) => ({
     });
 
     client.updateSession({
-      instructions: 'You are a great, upbeat friend.',
+      instructions: 'You are a great, upbeat friend. You are a text to speech agent assisting a person with autism. The person is typing words on a letterboard, and needs your help to read them. Read the words out loud, EXACTLY AS THEY ARE TYPED, with no other commentary. For example, if the user types "I", just say "I". If the user types "I love you", just say "I love you".',
       voice: 'alloy',
       turn_detection: { type: 'none' },
       input_audio_transcription: { model: 'whisper-1' },
@@ -49,10 +55,14 @@ const useAudioStore = create<AudioStore>((set, get) => ({
   },
 
   disconnectFromRealtimeAPI: () => {
-    const { realtimeClient } = get();
+    const { realtimeClient, audioTimeout } = get();
     if (realtimeClient) {
       realtimeClient.disconnect();
       set({ realtimeClient: null });
+    }
+    if (audioTimeout) {
+      clearTimeout(audioTimeout);
+      set({ audioTimeout: null });
     }
   },
 
@@ -64,7 +74,27 @@ const useAudioStore = create<AudioStore>((set, get) => ({
   },
 
   handleAudioData: (audioData: Record<string, number>) => {
-    const { audioContext } = get();
+    const { audioBuffer, audioTimeout } = get();
+    
+    // Merge new audio data with existing buffer
+    const newBuffer = { ...audioBuffer, ...audioData };
+    set({ audioBuffer: newBuffer });
+
+    // Clear existing timeout if there is one
+    if (audioTimeout) {
+      clearTimeout(audioTimeout);
+    }
+
+    // Set new timeout
+    const newTimeout = setTimeout(() => {
+      get().playAudioBuffer();
+    }, DEBOUNCE_TIME);
+
+    set({ audioTimeout: newTimeout });
+  },
+
+  playAudioBuffer: () => {
+    const { audioContext, audioBuffer } = get();
     if (!audioContext) return;
 
     // Normalize audio data
@@ -81,14 +111,17 @@ const useAudioStore = create<AudioStore>((set, get) => ({
       return normalizedData;
     };
 
-    const normalizedData = normalizeAudio(audioData);
+    const normalizedData = normalizeAudio(audioBuffer);
 
     // Create audio buffer
-    const buffer = audioContext.createBuffer(1, Object.keys(normalizedData).length, SAMPLE_RATE);
+    const dataLength = Object.keys(normalizedData).length;
+    const buffer = audioContext.createBuffer(1, dataLength, SAMPLE_RATE);
     const channelData = buffer.getChannelData(0);
 
-    for (let i = 0; i < channelData.length; i++) {
-      channelData[i] = normalizedData[i] / 32767; // Convert to float
+    // Fill the buffer
+    for (let i = 0; i < dataLength; i++) {
+      // Convert from 16-bit integer to float
+      channelData[i] = normalizedData[i] / 32768;
     }
 
     // Play audio
@@ -99,11 +132,11 @@ const useAudioStore = create<AudioStore>((set, get) => ({
     set({ isPlaying: true });
 
     source.onended = () => {
-      set({ isPlaying: false });
+      set({ isPlaying: false, audioBuffer: {} }); // Clear the buffer after playing
     };
 
     console.log(`Playing audio with sample rate: ${SAMPLE_RATE} Hz`);
-    console.log(`Audio duration: ${buffer.duration} seconds`);
+    console.log(`Audio duration: ${dataLength / SAMPLE_RATE} seconds`);
   },
 }));
 
