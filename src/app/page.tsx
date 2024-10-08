@@ -1,11 +1,11 @@
-import { LetterboardWithAudio } from '@/components/LetterboardWithAudio'
-import TestAudioPlayer from '@/components/TestAudioPlayer'
+import LetterboardWithAudio from '@/components/LetterboardWithAudio'
+// import TestAudioPlayer from '@/components/TestAudioPlayer'
 
 export default function Home() {
   return (
     <main>
-      {/* <LetterboardWithAudio /> */}
-      <TestAudioPlayer />
+      <LetterboardWithAudio />
+      {/* <TestAudioPlayer /> */}
     </main>
   )
 }

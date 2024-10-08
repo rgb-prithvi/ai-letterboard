@@ -1,13 +1,27 @@
 "use client"
 
+import { useEffect } from 'react'
 import useLetterboardStore from '@/store/useLetterboardStore'
+import useAudioStore from '@/store/useAudioStore'
 
 export function Letterboard() {
   const { text, predictions, appendLetter, backspace, clear, selectPrediction } = useLetterboardStore()
+  const { sendUserMessage } = useAudioStore()
 
   const handleClick = (letter: string) => {
     appendLetter(letter)
   }
+
+  useEffect(() => {
+    // Check if the last character is a space
+    if (text.endsWith(' ')) {
+      const words = text.trim().split(/\s+/)
+      const lastWord = words[words.length - 1]
+      if (lastWord) {
+        sendUserMessage(lastWord)
+      }
+    }
+  }, [text, sendUserMessage])
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">
