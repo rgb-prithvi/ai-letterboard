@@ -69,7 +69,8 @@ const useAudioStore = create<AudioStore>((set, get) => ({
   sendUserMessage: (text: string) => {
     const { realtimeClient } = get();
     if (realtimeClient) {
-      realtimeClient.sendUserMessageContent([{ type: 'input_text', text }]);
+      const prompt = `The user has typed the word "${text}". Please read it out loud.`;
+      realtimeClient.sendUserMessageContent([{ type: 'input_text', text: prompt }]);
     }
   },
 

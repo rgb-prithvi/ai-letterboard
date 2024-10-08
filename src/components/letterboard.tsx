@@ -20,8 +20,8 @@ export function Letterboard() {
       const words = text.trim().split(/\s+/)
       const lastWord = words[words.length - 1]
       if (lastWord) {
-        // sendUserMessage(lastWord)
-        speak(lastWord) // Use the new TTS functionality
+        sendUserMessage(lastWord)
+        // speak(lastWord)
       }
     }
   }, [text, sendUserMessage, speak])
