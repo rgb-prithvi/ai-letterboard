@@ -16,6 +16,7 @@ interface AudioStore {
   sendUserMessage: (text: string) => void;
   handleAudioData: (audioData: Record<string, number>) => void;
   playAudioBuffer: () => void;
+  sendFullSentence: (text: string) => void;
 }
 
 const useAudioStore = create<AudioStore>((set, get) => ({
@@ -138,6 +139,14 @@ const useAudioStore = create<AudioStore>((set, get) => ({
 
     console.log(`Playing audio with sample rate: ${SAMPLE_RATE} Hz`);
     console.log(`Audio duration: ${dataLength / SAMPLE_RATE} seconds`);
+  },
+
+  sendFullSentence: (text: string) => {
+    const { realtimeClient } = get();
+    if (realtimeClient) {
+      const prompt = `The user has typed the following sentence: "${text}". Please read it out loud. Note that the user is autistic, and may not type in full sentences. If they don't type a proper sentence, please fix it for them. For example, if they type "I want drive", please read it as "I want to go for a drive".`;
+      realtimeClient.sendUserMessageContent([{ type: 'input_text', text: prompt }]);
+    }
   },
 }));
 

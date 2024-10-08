@@ -7,11 +7,17 @@ import useTTSStore from '@/store/useTTSStore'
 
 export function Letterboard() {
   const { text, predictions, appendLetter, backspace, clear, selectPrediction } = useLetterboardStore()
-  const { sendUserMessage } = useAudioStore()
+  const { sendUserMessage, sendFullSentence } = useAudioStore()
   const { speak, isLoading } = useTTSStore()
 
   const handleClick = (letter: string) => {
     appendLetter(letter)
+  }
+
+  const handleSubmit = () => {
+    if (text.trim()) {
+      sendFullSentence(text.trim())
+    }
   }
 
   useEffect(() => {
@@ -67,7 +73,7 @@ export function Letterboard() {
           </button>
         ))}
       </div>
-      {/* Row for Space, Backspace, and Clear buttons */}
+      {/* Row for Space, Backspace, Clear, and Submit buttons */}
       <div className="flex justify-center gap-4 p-4">
         <button
           onClick={() => handleClick(" ")}
@@ -86,6 +92,12 @@ export function Letterboard() {
           className="w-32 h-16 text-2xl font-bold rounded-lg bg-primary text-primary-foreground shadow-md hover:bg-primary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           Clear
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="w-32 h-16 text-2xl font-bold rounded-lg bg-green-500 text-white shadow-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
+          Submit
         </button>
       </div>
       
