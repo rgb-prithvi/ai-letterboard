@@ -34,6 +34,9 @@ const TestAudioPlayer = () => {
     sourceNodeRef.current.onended = () => {
       setIsPlaying(false);
     };
+
+    console.log(`Playing audio with sample rate: ${audioContextRef.current.sampleRate} Hz`);
+    console.log(`Audio duration: ${buffer.duration} seconds`);
   };
 
   const handleStop = () => {
