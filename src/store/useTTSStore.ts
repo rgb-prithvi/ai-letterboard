@@ -1,4 +1,10 @@
 import { create } from 'zustand';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true,
+});
 
 interface TTSStore {
   isLoading: boolean;
@@ -12,19 +18,13 @@ const useTTSStore = create<TTSStore>((set) => ({
     set({ isLoading: true });
 
     try {
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text }),
+      const mp3 = await openai.audio.speech.create({
+        model: "tts-1",
+        voice: "echo",
+        input: text,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate speech');
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
+      const arrayBuffer = await mp3.arrayBuffer();
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
