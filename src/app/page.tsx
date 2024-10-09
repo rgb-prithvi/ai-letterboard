@@ -1,11 +1,13 @@
 import LetterboardWithAudio from '@/components/LetterboardWithAudio'
-// import TestAudioPlayer from '@/components/TestAudioPlayer'
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import AuthButton from '@/components/AuthButton';
+import { AuthScreen } from '@/components/AuthScreen';
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+
   return (
-    <main>
-      <LetterboardWithAudio />
-      {/* <TestAudioPlayer /> */}
-    </main>
-  )
+    session ? <LetterboardWithAudio /> : <AuthScreen />
+  );
 }
