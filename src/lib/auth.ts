@@ -12,8 +12,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         // This is where you would typically check against your database
-        if (credentials?.username === "user" && credentials?.password === "password") {
-          return { id: "1", name: "User", email: "user@example.com" };
+        if (credentials?.username === "user@gmail.com" && credentials?.password === "password") {
+          return { id: "1", name: "User", email: "user@gmail.com" };
         }
         return null;
       }
