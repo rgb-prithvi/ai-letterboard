@@ -18,7 +18,7 @@ export function AuthScreen() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await signIn('credentials', {
-      username: email,
+      email: email,  // Changed from username to email
       password: password,
       redirect: false,
     });
