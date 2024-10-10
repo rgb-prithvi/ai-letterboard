@@ -20,6 +20,8 @@
 .DS_Store
 *.pem
 **/*env*
+**/*password*
+**/*account-creation.sql
 
 # debug
 npm-debug.log*

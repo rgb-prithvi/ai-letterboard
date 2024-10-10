@@ -13,10 +13,12 @@ import { Label } from "@/components/ui/label";
 export function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');  // New state for error message
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');  // Clear any previous error messages
     const result = await signIn('credentials', {
       email: email,  // Changed from username to email
       password: password,
@@ -24,7 +26,8 @@ export function AuthScreen() {
     });
 
     if (result?.error) {
-      // Handle error (e.g., show error message)
+      // Set error message
+      setError('Invalid email or password. Please try again.');
       console.error(result.error);
     } else {
       // Redirect to dashboard or home page
@@ -72,6 +75,11 @@ export function AuthScreen() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            {error && (
+              <div>
+                <p className="text-center text-red-500 text-sm mt-2">{error}</p>
+              </div>
+            )}
             <Button type="submit" className="w-full">
               Login
             </Button>

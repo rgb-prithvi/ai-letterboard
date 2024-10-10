@@ -1,7 +1,10 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { compare } from 'bcrypt';
-import { db } from '@/lib/db'; // You'll need to create this database connection
+import { compare, hash } from 'bcrypt';
+import { supabase } from '@/lib/supabase';
+
+// Define salt rounds
+const SALT_ROUNDS = 12;
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -17,10 +20,12 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await db.query(
-          'SELECT * FROM USER WHERE email = ?',
-          [credentials.email]
-        );
+        // Use the shared supabase client
+        const { data: user, error } = await supabase
+          .from('AUTH_USER')
+          .select('*')
+          .eq('email', credentials.email)
+          .single();
 
         if (!user || !user[0]) {
           return null;

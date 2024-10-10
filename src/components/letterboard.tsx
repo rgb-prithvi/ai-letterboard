@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import useLetterboardStore from '@/store/useLetterboardStore'
 import useAudioStore from '@/store/useAudioStore'
 import useTTSStore from '@/store/useTTSStore'
+import analytics from '@/lib/analytics'
 
 export function Letterboard() {
   const { text, predictions, appendLetter, backspace, clear, selectPrediction } = useLetterboardStore()
@@ -12,13 +13,27 @@ export function Letterboard() {
 
   const handleClick = (letter: string) => {
     appendLetter(letter)
+    analytics.trackInteraction('button_press', letter)
   }
 
   const handleSubmit = () => {
     if (text.trim()) {
       sendFullSentence(text.trim())
+      analytics.trackInteraction('message_completion', text.trim(), text.length) // Assuming composition time is roughly equal to text length
     }
   }
+
+  const handlePredictionSelect = (prediction: string) => {
+    selectPrediction(prediction)
+    analytics.trackInteraction('word_selection', prediction)
+  }
+
+  const handleSpeak = useCallback((word: string) => {
+    speak(word)
+    analytics.trackInteraction('word_spoken', word)
+    // Track audio generation
+    analytics.trackAudioTrace(Date.now().toString(), `Audio generated for: ${word}`)
+  }, [speak])
 
   useEffect(() => {
     // Check if the last character is a space
@@ -26,11 +41,10 @@ export function Letterboard() {
       const words = text.trim().split(/\s+/)
       const lastWord = words[words.length - 1]
       if (lastWord) {
-        // sendUserMessage(lastWord)
-        speak(lastWord)
+        handleSpeak(lastWord)
       }
     }
-  }, [text, sendUserMessage, speak])
+  }, [text, handleSpeak])
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">
@@ -51,7 +65,7 @@ export function Letterboard() {
             predictions.map((prediction, index) => (
               <button
                 key={index}
-                onClick={() => selectPrediction(prediction)}
+                onClick={() => handlePredictionSelect(prediction)}
                 className="px-4 py-2 text-lg font-semibold rounded-lg bg-primary text-primary-foreground shadow-md hover:bg-primary/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 {prediction}
@@ -110,3 +124,4 @@ export function Letterboard() {
     </div>
   )
 }
+
