@@ -2,117 +2,161 @@
 
 ## Overview
 
-This document outlines the data model for a communication app designed to assist users with autism in typing and speaking words and phrases. The model is designed to efficiently capture user interactions, session data, and feedback while maintaining simplicity and ease of use.
+This document outlines the updated data model for a communication app designed to assist users with autism in typing and speaking words and phrases. The model is designed to efficiently capture user interactions, session data, and feedback while maintaining simplicity and ease of use.
 
 ## Entity Relationship Diagram
 
 ```mermaid
 erDiagram
-    USER {
-        int user_id PK
-        string name
-        date created_at
+    AUTH_USER {
+        bigint auth_user_id PK
+        text email
+        text password_hash
+        text name
+        timestamp created_at
+    }
+    APP_USER {
+        bigint user_id PK
+        bigint auth_user_id FK
+        text name
+        timestamp created_at
     }
     SESSION {
-        int session_id PK
-        int user_id FK
-        datetime start_time
-        datetime end_time
+        bigint session_id PK
+        bigint user_id FK
+        timestamp start_time
+        timestamp end_time
         int duration
-        string board_type
+    }
+    BOARD_USAGE {
+        bigint board_usage_id PK
+        bigint session_id FK
+        text board_type
+        timestamp start_time
+        timestamp end_time
+        int duration
     }
     INTERACTION {
-        int interaction_id PK
-        int session_id FK
-        string type
-        string content
-        datetime timestamp
+        bigint interaction_id PK
+        bigint session_id FK
+        text type
+        text content
+        timestamp timestamp
         int composition_time
     }
     AUDIO_TRACE {
-        int audio_trace_id PK
-        int interaction_id FK
-        string file_path
-        datetime timestamp
+        bigint audio_trace_id PK
+        bigint interaction_id FK
+        text file_path
+        timestamp timestamp
     }
     FEEDBACK {
-        int feedback_id PK
-        int user_id FK
-        string content
-        datetime timestamp
+        bigint feedback_id PK
+        bigint user_id FK
+        text content
+        timestamp timestamp
     }
 
-    USER ||--o{ SESSION : has
+    AUTH_USER ||--o| APP_USER : authenticates
+    APP_USER ||--o{ SESSION : has
+    SESSION ||--o{ BOARD_USAGE : tracks
     SESSION ||--o{ INTERACTION : contains
     INTERACTION ||--o{ AUDIO_TRACE : generates
-    USER ||--o{ FEEDBACK : provides
+    APP_USER ||--o{ FEEDBACK : provides
 ```
 
 ## Table Definitions
 
-### USER
+### AUTH_USER
+
+Stores authentication information for users.
+
+| Column         | Type      | Description                           |
+|----------------|-----------|---------------------------------------|
+| auth_user_id   | bigint    | Primary key, unique identifier for auth user |
+| email          | text      | User's email address (unique)         |
+| password_hash  | text      | Hashed password for authentication    |
+| name           | text      | User's name (optional)                |
+| created_at     | timestamp | When the auth user was created        |
+
+### APP_USER
 
 Stores basic information about each user of the app.
 
-| Column      | Type   | Description                           |
-|-------------|--------|---------------------------------------|
-| user_id     | int    | Primary key, unique identifier for user |
-| name        | string | User's name                           |
-| created_at  | date   | Date when the user account was created |
+| Column         | Type      | Description                           |
+|----------------|-----------|---------------------------------------|
+| user_id        | bigint    | Primary key, unique identifier for user |
+| auth_user_id   | bigint    | Foreign key referencing AUTH_USER table |
+| name           | text      | User's name                           |
+| created_at     | timestamp | When the user account was created     |
 
 ### SESSION
 
 Represents a single usage session of the app.
 
-| Column      | Type     | Description                           |
-|-------------|----------|---------------------------------------|
-| session_id  | int      | Primary key, unique identifier for session |
-| user_id     | int      | Foreign key referencing USER table    |
-| start_time  | datetime | When the session started              |
-| end_time    | datetime | When the session ended                |
-| duration    | int      | Duration of the session in seconds    |
-| board_type  | string   | Type of board used (keyboard/word board) |
+| Column      | Type      | Description                           |
+|-------------|-----------|---------------------------------------|
+| session_id  | bigint    | Primary key, unique identifier for session |
+| user_id     | bigint    | Foreign key referencing APP_USER table |
+| start_time  | timestamp | When the session started              |
+| end_time    | timestamp | When the session ended                |
+| duration    | int       | Duration of the session in seconds    |
+
+### BOARD_USAGE
+
+Tracks the usage of different board types within a session.
+
+| Column         | Type      | Description                           |
+|----------------|-----------|---------------------------------------|
+| board_usage_id | bigint    | Primary key, unique identifier for board usage |
+| session_id     | bigint    | Foreign key referencing SESSION table |
+| board_type     | text      | Type of board used (e.g., keyboard, word board) |
+| start_time     | timestamp | When the board usage started          |
+| end_time       | timestamp | When the board usage ended            |
+| duration       | int       | Duration of the board usage in seconds |
 
 ### INTERACTION
 
 Captures various types of user interactions within a session.
 
-| Column           | Type     | Description                           |
-|------------------|----------|---------------------------------------|
-| interaction_id   | int      | Primary key, unique identifier for interaction |
-| session_id       | int      | Foreign key referencing SESSION table |
-| type             | string   | Type of interaction (e.g., button_press, word_selection, message_completion) |
-| content          | string   | Content of the interaction (e.g., button pressed, word selected, message composed) |
-| timestamp        | datetime | When the interaction occurred         |
-| composition_time | int      | Time taken to compose (for messages)  |
+| Column           | Type      | Description                           |
+|------------------|-----------|---------------------------------------|
+| interaction_id   | bigint    | Primary key, unique identifier for interaction |
+| session_id       | bigint    | Foreign key referencing SESSION table |
+| type             | text      | Type of interaction (e.g., button_press, word_selection, message_completion) |
+| content          | text      | Content of the interaction (e.g., button pressed, word selected, message composed) |
+| timestamp        | timestamp | When the interaction occurred         |
+| composition_time | int       | Time taken to compose (for messages)  |
 
 ### AUDIO_TRACE
 
 Stores references to audio files generated by the text-to-speech AI.
 
-| Column         | Type     | Description                           |
-|----------------|----------|---------------------------------------|
-| audio_trace_id | int      | Primary key, unique identifier for audio trace |
-| interaction_id | int      | Foreign key referencing INTERACTION table |
-| file_path      | string   | Path or URL to the stored audio file  |
-| timestamp      | datetime | When the audio was generated          |
+| Column         | Type      | Description                           |
+|----------------|-----------|---------------------------------------|
+| audio_trace_id | bigint    | Primary key, unique identifier for audio trace |
+| interaction_id | bigint    | Foreign key referencing INTERACTION table |
+| file_path      | text      | Path or URL to the stored audio file  |
+| timestamp      | timestamp | When the audio was generated          |
 
 ### FEEDBACK
 
 Captures user feedback and notes.
 
-| Column      | Type     | Description                           |
-|-------------|----------|---------------------------------------|
-| feedback_id | int      | Primary key, unique identifier for feedback |
-| user_id     | int      | Foreign key referencing USER table    |
-| content     | string   | Content of the feedback               |
-| timestamp   | datetime | When the feedback was provided        |
+| Column      | Type      | Description                           |
+|-------------|-----------|---------------------------------------|
+| feedback_id | bigint    | Primary key, unique identifier for feedback |
+| user_id     | bigint    | Foreign key referencing APP_USER table |
+| content     | text      | Content of the feedback               |
+| timestamp   | timestamp | When the feedback was provided        |
 
 ## Relationships
 
-1. A USER can have multiple SESSIONs (one-to-many)
-2. A SESSION can have multiple INTERACTIONs (one-to-many)
-3. An INTERACTION can generate multiple AUDIO_TRACEs (one-to-many)
-4. A USER can provide multiple FEEDBACK entries (one-to-many)
+1. An AUTH_USER can authenticate one APP_USER (one-to-one)
+2. An APP_USER can have multiple SESSIONs (one-to-many)
+3. A SESSION can have multiple BOARD_USAGEs (one-to-many)
+4. A SESSION can have multiple INTERACTIONs (one-to-many)
+5. An INTERACTION can generate multiple AUDIO_TRACEs (one-to-many)
+6. An APP_USER can provide multiple FEEDBACK entries (one-to-many)
 
-This data model allows for efficient tracking of user interactions, session data, and feedback while maintaining a simple and easy-to-query structure.
+This updated data model allows for efficient tracking of user authentication, interactions, session data, board usage, and feedback while maintaining a simple and easy-to-query structure.
