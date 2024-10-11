@@ -8,3 +8,23 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
+export async function testSupabaseConnection() {
+  try {
+    const { data, error } = await supabase
+      .from('auth_user')
+      .select('count(*)')
+      .single();
+
+    if (error) {
+      console.error('Connection test failed:', error);
+      return false;
+    }
+
+    console.log('Connection test successful. Row count:', data.count);
+    return true;
+  } catch (err) {
+    console.error('Unexpected error during connection test:', err);
+    return false;
+  }
+}

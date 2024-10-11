@@ -3,7 +3,6 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare, hash } from 'bcrypt';
 import { supabase } from '@/lib/supabase';
 
-// Define salt rounds
 const SALT_ROUNDS = 12;
 
 export const authOptions: NextAuthOptions = {
@@ -22,25 +21,31 @@ export const authOptions: NextAuthOptions = {
 
         // Use the shared supabase client
         const { data: user, error } = await supabase
-          .from('AUTH_USER')
+          .from('auth_user')
           .select('*')
-          .eq('email', credentials.email)
+          .ilike('email', credentials.email)
           .single();
 
-        if (!user || !user[0]) {
+        if (error) {
+          console.error('Error fetching user:', error);
           return null;
         }
 
-        const isPasswordValid = await compare(credentials.password, user[0].password_hash);
+        if (!user) {
+          console.log('User not found...');
+          return null;
+        }
+
+        const isPasswordValid = await compare(credentials.password, user.password_hash);
 
         if (!isPasswordValid) {
           return null;
         }
 
         return { 
-          id: user[0].auth_user_id.toString(),
-          email: user[0].email,
-          name: user[0].name
+          id: user.auth_user_id.toString(),
+          email: user.email,
+          name: user.name
         };
       }
     }),
