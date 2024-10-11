@@ -57,7 +57,7 @@ class AnalyticsSDK {
 
     const duration = Math.round((endTime.getTime() - startTime.getTime()) / 1000);
     const { error } = await this.supabase
-      .from('BOARD_USAGE')
+      .from('board_usage')
       .insert({
         session_id: this.sessionId,
         board_type: boardType,
@@ -77,7 +77,7 @@ class AnalyticsSDK {
     }
 
     const { error } = await this.supabase
-      .from('INTERACTION')
+      .from('interaction')
       .insert({
         session_id: this.sessionId,
         type,
@@ -93,7 +93,7 @@ class AnalyticsSDK {
 
   async trackAudioTrace(interactionId: string, description: string): Promise<void> {
     const { error } = await this.supabase
-      .from('AUDIO_TRACE')
+      .from('audio_trace')
       .insert({
         interaction_id: interactionId,
         file_path: description, // We're using this field to store the description now
@@ -111,7 +111,7 @@ class AnalyticsSDK {
     }
 
     const { error } = await this.supabase
-      .from('FEEDBACK')
+      .from('feedback')
       .insert({
         user_id: this.userId,
         content,

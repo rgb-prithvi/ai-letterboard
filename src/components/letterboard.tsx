@@ -31,8 +31,7 @@ export function Letterboard() {
   const handleSpeak = useCallback((word: string) => {
     speak(word)
     analytics.trackInteraction('word_spoken', word)
-    // Track audio generation
-    analytics.trackAudioTrace(Date.now().toString(), `Audio generated for: ${word}`)
+    // analytics.trackAudioTrace(Date.now().toString(), `Audio generated for: ${word}`)
   }, [speak])
 
   useEffect(() => {
