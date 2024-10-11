@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 import { CustomizationSettingsComponent } from "./customization-settings"
+import { signOut } from "next-auth/react";
 
 export function TopBarComponent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -24,7 +25,7 @@ export function TopBarComponent() {
   ]
 
   const handleSignOut = () => {
-    // Implement sign out logic here
+    signOut();
     toast({
       description: "You have been signed out.",
     })

@@ -7,7 +7,7 @@ import useTTSStore from '@/store/useTTSStore'
 import analytics from '@/lib/analytics'
 
 export function Letterboard() {
-  const { text, predictions, appendLetter, backspace, clear, selectPrediction } = useLetterboardStore()
+  const { text, predictions, appendLetter, backspace, clear, selectPrediction, generatePredictions } = useLetterboardStore()
   const { sendUserMessage, sendFullSentence } = useAudioStore()
   const { speak, isLoading } = useTTSStore()
 
@@ -44,6 +44,10 @@ export function Letterboard() {
       }
     }
   }, [text, handleSpeak])
+
+  useEffect(() => {
+    generatePredictions();
+  }, [text, generatePredictions]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">
