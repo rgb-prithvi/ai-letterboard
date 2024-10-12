@@ -2,32 +2,11 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { CircleUser, Menu, Package2, Search } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { CustomizationOptions } from "./customization-options";
+import { WordBanksSection } from "./WordBanksSection";
+import { HistoryDocumentsSection } from "./HistoryDocumentsSection";
 
 export function SettingsPage() {
   const { data: session } = useSession();
@@ -70,71 +49,8 @@ export function SettingsPage() {
           </nav>
           <div className="grid gap-6">
             {activeTab === "customization" && <CustomizationOptions />}
-            {activeTab === "wordbanks" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Word Banks</CardTitle>
-                  <CardDescription>Manage your word banks for autocomplete</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <Label>Current Word Banks</Label>
-                    <Button>Add New</Button>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 border rounded">
-                      <span>Default</span>
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="word-input">Add Words</Label>
-                    <Textarea id="word-input" placeholder="Enter words separated by commas" />
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline">Upload Words</Button>
-                    <Button>Generate with AI</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            {activeTab === "history" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>History & Documents</CardTitle>
-                  <CardDescription>View and manage your text snippets</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <span className="truncate">Sample text 1</span>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
-                        Copy
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Export
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <span className="truncate">Sample text 2</span>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
-                        Copy
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Export
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline">Export All</Button>
-                </CardFooter>
-              </Card>
-            )}
+            {activeTab === "wordbanks" && <WordBanksSection />}
+            {activeTab === "history" && <HistoryDocumentsSection />}
           </div>
         </div>
       </main>
