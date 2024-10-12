@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,16 +26,25 @@ export function HistoryDocumentsSection() {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const { toast } = useToast();
+  const { data: session } = useSession();
 
   useEffect(() => {
-    fetchDocuments();
-  }, []);
+    if (session?.user?.id) {
+      fetchDocuments(session.user.id);
+    }
+  }, [session]);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("interaction")
-        .select("interaction_id, content, timestamp")
+        .select(`
+          interaction_id,
+          content,
+          timestamp,
+          user_id
+        `)
+        .eq("user_id", userId)
         .eq("type", "message_completion")
         .order("timestamp", { ascending: false });
 
@@ -82,43 +92,48 @@ export function HistoryDocumentsSection() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>History & Documents</CardTitle>
-        <CardDescription>View and manage your completed messages</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {documents.map((doc) => (
-          <div
-            key={doc.id}
-            className="flex items-center justify-between p-2 border rounded"
-          >
-            <div className="flex flex-col">
-              <span className="truncate">{doc.content}</span>
-              <span className="text-sm text-gray-500">
-                {new Date(doc.timestamp).toLocaleString()}
-              </span>
-            </div>
-            <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" onClick={() => copyToClipboard(doc.content)}>
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => handleDownload(doc)}>
-                <Download className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </CardContent>
-      <CardFooter>
-        <Button variant="outline" onClick={handleDownloadAll}>
-          Export All
-        </Button>
-      </CardFooter>
-      <DownloadModal
-        isOpen={isDownloadModalOpen}
-        onClose={() => setIsDownloadModalOpen(false)}
-        document={selectedDocument}
-      />
+      {session?.user?.id ? (
+        <>
+          <CardHeader>
+            <CardTitle>History & Documents</CardTitle>
+            <CardDescription>View and manage your completed messages</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {documents.map((doc) => (
+              <div key={doc.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex flex-col">
+                  <span className="truncate">{doc.content}</span>
+                  <span className="text-sm text-gray-500">
+                    {new Date(doc.timestamp).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="ghost" size="icon" onClick={() => copyToClipboard(doc.content)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDownload(doc)}>
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" onClick={handleDownloadAll}>
+              Export All
+            </Button>
+          </CardFooter>
+          <DownloadModal
+            isOpen={isDownloadModalOpen}
+            onClose={() => setIsDownloadModalOpen(false)}
+            document={selectedDocument}
+          />
+        </>
+      ) : (
+        <CardContent>
+          <p>Please sign in to view your documents.</p>
+        </CardContent>
+      )}
     </Card>
   );
 }
