@@ -26,21 +26,7 @@ import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/lib/supabase";
 import { getSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
-
-interface UserSettings {
-  theme: "light" | "dark";
-  inputMode: string;
-  textToSpeech: boolean;
-  autoCompletion: boolean;
-  textColor: string;
-  buttonColor: string;
-  keyboardDelay: number;
-  fontSize: number;
-  keyboardLayout: string;
-  font: string;
-  letterCase: string;
-}
-
+import { UserSettings } from "@/lib/types";
 export function CustomizationOptions() {
   const [userSettings, setUserSettings] = useState<UserSettings>({
     theme: "light",
@@ -57,7 +43,7 @@ export function CustomizationOptions() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUserSettings();
@@ -89,17 +75,17 @@ export function CustomizationOptions() {
           .from("app_user")
           .update({ settings: userSettings })
           .eq("user_id", session.user.id);
-        
+
         toast({
           title: "Settings saved",
           description: "Your customization options have been updated.",
-        })
+        });
       } catch (error) {
         toast({
           title: "Error",
           description: "Failed to save settings. Please try again.",
           variant: "destructive",
-        })
+        });
       } finally {
         setIsSaving(false);
       }
@@ -214,8 +200,8 @@ export function CustomizationOptions() {
           </div>
           <Slider
             id="font-size"
-            min={8}
-            max={32}
+            min={12}
+            max={48}
             step={1}
             value={[userSettings.fontSize]}
             onValueChange={(value) => updateSetting("fontSize", value[0])}
@@ -234,8 +220,7 @@ export function CustomizationOptions() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="qwerty">QWERTY</SelectItem>
-              <SelectItem value="azerty">AZERTY</SelectItem>
-              <SelectItem value="dvorak">Dvorak</SelectItem>
+              <SelectItem value="abcd">ABCD</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -265,8 +250,7 @@ export function CustomizationOptions() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="lowercase">lowercase</SelectItem>
-              <SelectItem value="UPPERCASE">UPPERCASE</SelectItem>
-              <SelectItem value="Sentence case">Sentence case</SelectItem>
+              <SelectItem value="uppercase">UPPERCASE</SelectItem>
             </SelectContent>
           </Select>
         </div>

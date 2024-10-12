@@ -7,7 +7,11 @@ import ClientAnalyticsWrapper from './ClientAnalyticsWrapper';
 import { useSession } from 'next-auth/react';
 import analytics from '@/lib/analytics';
 
-const LetterboardWithAudio: React.FC = () => {
+interface LetterboardWithAudioProps {
+  userSettings: any; // Replace 'any' with a proper type for your user settings
+}
+
+const LetterboardWithAudio: React.FC<LetterboardWithAudioProps> = ({ userSettings }) => {
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -24,7 +28,7 @@ const LetterboardWithAudio: React.FC = () => {
   return (
     <ClientAnalyticsWrapper userId={session?.user?.id}>
       <WithAudioPlayback>
-        <Letterboard />
+        <Letterboard userSettings={userSettings} />
       </WithAudioPlayback>
     </ClientAnalyticsWrapper>
   );
