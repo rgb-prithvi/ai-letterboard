@@ -12,10 +12,12 @@ import { Copy, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { useToast } from "@/components/ui/use-toast";
 import { DownloadModal } from "@/components/DownloadModal";
+import { supabase } from "@/lib/supabase";
 
 interface Document {
   id: string;
   content: string;
+  timestamp: string;
 }
 
 export function HistoryDocumentsSection() {
@@ -25,13 +27,35 @@ export function HistoryDocumentsSection() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // TODO: Fetch documents from your data source (e.g., API or local storage)
-    const fetchedDocuments = [
-      { id: "1", content: "Sample text 1" },
-      { id: "2", content: "Sample text 2" },
-    ];
-    setDocuments(fetchedDocuments);
+    fetchDocuments();
   }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("interaction")
+        .select("interaction_id, content, timestamp")
+        .eq("type", "message_completion")
+        .order("timestamp", { ascending: false });
+
+      if (error) throw error;
+
+      setDocuments(
+        data?.map((item) => ({
+          id: item.interaction_id,
+          content: item.content,
+          timestamp: item.timestamp,
+        })) || [],
+      );
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch documents. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const copyToClipboard = (content: string) => {
     navigator.clipboard.writeText(content).then(() => {
@@ -48,7 +72,11 @@ export function HistoryDocumentsSection() {
   };
 
   const handleDownloadAll = () => {
-    setSelectedDocument({ id: "all", content: documents.map((d) => d.content).join("\n\n") });
+    setSelectedDocument({
+      id: "all",
+      content: documents.map((d) => d.content).join("\n\n"),
+      timestamp: new Date().toISOString(),
+    });
     setIsDownloadModalOpen(true);
   };
 
@@ -56,12 +84,20 @@ export function HistoryDocumentsSection() {
     <Card>
       <CardHeader>
         <CardTitle>History & Documents</CardTitle>
-        <CardDescription>View and manage your text snippets</CardDescription>
+        <CardDescription>View and manage your completed messages</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {documents.map((doc) => (
-          <div key={doc.id} className="flex items-center justify-between p-2 border rounded">
-            <span className="truncate">{doc.content}</span>
+          <div
+            key={doc.id}
+            className="flex items-center justify-between p-2 border rounded"
+          >
+            <div className="flex flex-col">
+              <span className="truncate">{doc.content}</span>
+              <span className="text-sm text-gray-500">
+                {new Date(doc.timestamp).toLocaleString()}
+              </span>
+            </div>
             <div className="flex space-x-2">
               <Button variant="ghost" size="icon" onClick={() => copyToClipboard(doc.content)}>
                 <Copy className="h-4 w-4" />
