@@ -6,8 +6,6 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -15,16 +13,18 @@ import {
 interface CreateBankModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreateBank: (name: string, words: string[]) => void;
 }
 
-export function CreateBankModal({ isOpen, onClose }: CreateBankModalProps) {
-  const [bankName, setBankName] = useState('');
+export function CreateBankModal({ isOpen, onClose, onCreateBank }: CreateBankModalProps) {
+  const [name, setName] = useState('');
   const [words, setWords] = useState('');
-  const [creationMethod, setCreationMethod] = useState<'upload' | 'manual' | 'ai'>('manual');
 
   const handleCreate = () => {
-    // Implement bank creation logic here
-    console.log('Creating bank:', bankName, words, creationMethod);
+    const wordList = words.split(',').map(word => word.trim()).filter(word => word !== '');
+    onCreateBank(name, wordList);
+    setName('');
+    setWords('');
     onClose();
   };
 
@@ -33,71 +33,29 @@ export function CreateBankModal({ isOpen, onClose }: CreateBankModalProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Word Bank</DialogTitle>
-          <DialogDescription>
-            Create a new word bank for autocomplete suggestions.
-          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
             <Label htmlFor="bank-name">Bank Name</Label>
             <Input
               id="bank-name"
-              value={bankName}
-              onChange={(e) => setBankName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Enter bank name"
             />
           </div>
           <div>
-            <Label>Creation Method</Label>
-            <div className="flex space-x-2 mt-2">
-              <Button
-                variant={creationMethod === 'upload' ? 'default' : 'outline'}
-                onClick={() => setCreationMethod('upload')}
-              >
-                Upload
-              </Button>
-              <Button
-                variant={creationMethod === 'manual' ? 'default' : 'outline'}
-                onClick={() => setCreationMethod('manual')}
-              >
-                Manual
-              </Button>
-              <Button
-                variant={creationMethod === 'ai' ? 'default' : 'outline'}
-                onClick={() => setCreationMethod('ai')}
-              >
-                AI Generate
-              </Button>
-            </div>
+            <Label htmlFor="bank-words">Words (comma-separated)</Label>
+            <Textarea
+              id="bank-words"
+              value={words}
+              onChange={(e) => setWords(e.target.value)}
+              placeholder="Enter words, separated by commas"
+              rows={5}
+            />
           </div>
-          {creationMethod === 'manual' && (
-            <div>
-              <Label htmlFor="words">Enter Words</Label>
-              <Textarea
-                id="words"
-                value={words}
-                onChange={(e) => setWords(e.target.value)}
-                placeholder="Enter words separated by commas"
-              />
-            </div>
-          )}
-          {creationMethod === 'upload' && (
-            <div>
-              <Label htmlFor="file-upload">Upload Word List</Label>
-              <Input id="file-upload" type="file" />
-            </div>
-          )}
-          {creationMethod === 'ai' && (
-            <div>
-              <Label>AI Generation</Label>
-              <p>AI word generation will be implemented here.</p>
-            </div>
-          )}
-        </div>
-        <DialogFooter>
-          <Button onClick={onClose} variant="outline">Cancel</Button>
           <Button onClick={handleCreate}>Create Bank</Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
