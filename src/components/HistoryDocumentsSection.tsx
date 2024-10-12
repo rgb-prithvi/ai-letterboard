@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Copy, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { DownloadModal } from "@/components/DownloadModal";
 
 interface Document {

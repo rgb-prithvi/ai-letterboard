@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
 import {
   Card,
@@ -23,11 +23,88 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { supabase } from "@/lib/supabase";
+import { getSession } from "next-auth/react";
+import { useToast } from "@/components/ui/use-toast";
+
+interface UserSettings {
+  theme: "light" | "dark";
+  inputMode: string;
+  textToSpeech: boolean;
+  autoCompletion: boolean;
+  textColor: string;
+  buttonColor: string;
+  keyboardDelay: number;
+  fontSize: number;
+  keyboardLayout: string;
+  font: string;
+  letterCase: string;
+}
 
 export function CustomizationOptions() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [keyboardDelay, setKeyboardDelay] = useState(0);
-  const [fontSize, setFontSize] = useState(18);
+  const [userSettings, setUserSettings] = useState<UserSettings>({
+    theme: "light",
+    inputMode: "letter",
+    textToSpeech: false,
+    autoCompletion: false,
+    textColor: "#000000",
+    buttonColor: "#000000",
+    keyboardDelay: 0,
+    fontSize: 18,
+    keyboardLayout: "QWERTY",
+    font: "Arial",
+    letterCase: "lowercase",
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast()
+
+  useEffect(() => {
+    fetchUserSettings();
+  }, []);
+
+  const fetchUserSettings = async () => {
+    const session = await getSession();
+    if (session && session.user) {
+      const { data, error } = await supabase
+        .from("app_user")
+        .select("settings")
+        .eq("user_id", session.user.id)
+        .single();
+
+      setUserSettings(data?.settings || {});
+    }
+  };
+
+  const updateSetting = (key: keyof UserSettings, value: any) => {
+    setUserSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const saveSettings = async () => {
+    setIsSaving(true);
+    const session = await getSession();
+    if (session && session.user) {
+      try {
+        await supabase
+          .from("app_user")
+          .update({ settings: userSettings })
+          .eq("user_id", session.user.id);
+        
+        toast({
+          title: "Settings saved",
+          description: "Your customization options have been updated.",
+        })
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to save settings. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
 
   return (
     <Card className="w-full max-w-3xl mx-auto">
@@ -38,7 +115,11 @@ export function CustomizationOptions() {
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label>Input Mode</Label>
-          <RadioGroup defaultValue="letter" className="flex space-x-4">
+          <RadioGroup
+            value={userSettings.inputMode}
+            onValueChange={(value) => updateSetting("inputMode", value)}
+            className="flex space-x-4"
+          >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="letter" id="letter" />
               <Label htmlFor="letter">Letter Mode</Label>
@@ -52,56 +133,76 @@ export function CustomizationOptions() {
 
         <div className="flex items-center justify-between">
           <Label htmlFor="text-to-speech">Text to speech</Label>
-          <Switch id="text-to-speech" />
+          <Switch
+            id="text-to-speech"
+            checked={userSettings.textToSpeech}
+            onCheckedChange={(value) => updateSetting("textToSpeech", value)}
+          />
         </div>
 
         <div className="flex items-center justify-between">
           <Label htmlFor="auto-completion">Auto Completion</Label>
-          <Switch id="auto-completion" />
+          <Switch
+            id="auto-completion"
+            checked={userSettings.autoCompletion}
+            onCheckedChange={(value) => updateSetting("autoCompletion", value)}
+          />
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label>Theme</Label>
           <div className="flex space-x-2">
             <Button
-              variant={theme === "light" ? "default" : "outline"}
+              variant={userSettings.theme === "light" ? "default" : "outline"}
               size="icon"
-              onClick={() => setTheme("light")}
+              onClick={() => updateSetting("theme", "light")}
             >
               <Sun className="h-4 w-4" />
             </Button>
             <Button
-              variant={theme === "dark" ? "default" : "outline"}
+              variant={userSettings.theme === "dark" ? "default" : "outline"}
               size="icon"
-              onClick={() => setTheme("dark")}
+              onClick={() => updateSetting("theme", "dark")}
             >
               <Moon className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </div> */}
 
         <div className="space-y-2">
           <Label htmlFor="text-color">Text Color</Label>
-          <Input id="text-color" type="color" className="h-10 w-full" />
+          <Input
+            id="text-color"
+            type="color"
+            value={userSettings.textColor}
+            onChange={(e) => updateSetting("textColor", e.target.value)}
+            className="h-10 w-full"
+          />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="button-color">Button Color</Label>
-          <Input id="button-color" type="color" className="h-10 w-full" />
+          <Input
+            id="button-color"
+            type="color"
+            value={userSettings.buttonColor}
+            onChange={(e) => updateSetting("buttonColor", e.target.value)}
+            className="h-10 w-full"
+          />
         </div>
 
         <div className="space-y-2">
           <div className="flex justify-between">
             <Label htmlFor="keyboard-delay">Keyboard action delay (ms)</Label>
-            <span className="text-sm text-muted-foreground">{keyboardDelay}ms</span>
+            <span className="text-sm text-muted-foreground">{userSettings.keyboardDelay}ms</span>
           </div>
           <Slider
             id="keyboard-delay"
             min={0}
             max={1000}
             step={10}
-            value={[keyboardDelay]}
-            onValueChange={(value) => setKeyboardDelay(value[0])}
+            value={[userSettings.keyboardDelay]}
+            onValueChange={(value) => updateSetting("keyboardDelay", value[0])}
             className="w-full"
           />
         </div>
@@ -109,22 +210,25 @@ export function CustomizationOptions() {
         <div className="space-y-2">
           <div className="flex justify-between">
             <Label htmlFor="font-size">Font Size (px)</Label>
-            <span className="text-sm text-muted-foreground">{fontSize}px</span>
+            <span className="text-sm text-muted-foreground">{userSettings.fontSize}px</span>
           </div>
           <Slider
             id="font-size"
             min={8}
             max={32}
             step={1}
-            value={[fontSize]}
-            onValueChange={(value) => setFontSize(value[0])}
+            value={[userSettings.fontSize]}
+            onValueChange={(value) => updateSetting("fontSize", value[0])}
             className="w-full"
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="keyboard-layout">Keyboard Layout</Label>
-          <Select>
+          <Select
+            value={userSettings.keyboardLayout}
+            onValueChange={(value) => updateSetting("keyboardLayout", value)}
+          >
             <SelectTrigger id="keyboard-layout">
               <SelectValue placeholder="Select layout" />
             </SelectTrigger>
@@ -138,7 +242,7 @@ export function CustomizationOptions() {
 
         <div className="space-y-2">
           <Label htmlFor="font">Font</Label>
-          <Select>
+          <Select value={userSettings.font} onValueChange={(value) => updateSetting("font", value)}>
             <SelectTrigger id="font">
               <SelectValue placeholder="Select font" />
             </SelectTrigger>
@@ -152,7 +256,10 @@ export function CustomizationOptions() {
 
         <div className="space-y-2">
           <Label htmlFor="letter-case">Letter Case</Label>
-          <Select>
+          <Select
+            value={userSettings.letterCase}
+            onValueChange={(value) => updateSetting("letterCase", value)}
+          >
             <SelectTrigger id="letter-case">
               <SelectValue placeholder="Select case" />
             </SelectTrigger>
@@ -165,7 +272,9 @@ export function CustomizationOptions() {
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full">Save Changes</Button>
+        <Button className="w-full" onClick={saveSettings} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
       </CardFooter>
     </Card>
   );

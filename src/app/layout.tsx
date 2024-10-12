@@ -4,6 +4,7 @@ import "./globals.css";
 import NextAuthProvider from "@/components/SessionProvider";
 import { TopBarComponent as TopBar } from "@/components/top-bar";
 import { CSPostHogProvider } from "@/lib/posthog-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </CSPostHogProvider>
         </NextAuthProvider>
+        <Toaster />
       </body>
     </html>
   );

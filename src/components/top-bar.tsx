@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Settings, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { signOut } from "next-auth/react";
 
 export function TopBarComponent() {
