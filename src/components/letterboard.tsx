@@ -28,22 +28,22 @@ export function Letterboard() {
     setCurrentWordSet('custom')
   }, [addWordSet, setCurrentWordSet])
 
-  const handleClick = (letter: string) => {
+  const handleClick = async (letter: string) => {
     appendLetter(letter)
     generatePredictions()
-    analytics.trackInteraction('button_press', letter)
+    await analytics.trackInteraction('button_press', letter)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (text.trim()) {
       sendFullSentence(text.trim())
-      analytics.trackInteraction('message_completion', text.trim(), text.length) // Assuming composition time is roughly equal to text length
+      await analytics.trackInteraction('message_completion', text.trim(), text.length)
     }
   }
 
-  const handlePredictionSelect = (prediction: string) => {
+  const handlePredictionSelect = async (prediction: string) => {
     selectPrediction(prediction)
-    analytics.trackInteraction('word_selection', prediction)
+    await analytics.trackPredictionSelect(prediction)
   }
 
   const handleSpeak = useCallback((word: string) => {

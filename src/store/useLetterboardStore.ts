@@ -38,7 +38,13 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     return { text: newText }
   }),
   clear: () => set({ text: '' }),
-  selectPrediction: (prediction) => set((state) => ({ text: state.text.trimEnd() + ' ' + prediction + ' ' })),
+  selectPrediction: (prediction) => set((state) => {
+    const words = state.text.split(' ')
+    words[words.length - 1] = prediction
+    const newText = words.join(' ') + ' '
+    setTimeout(() => get().generatePredictions(), 0)
+    return { text: newText }
+  }),
   setText: (newText) => set({ text: newText }),
   addWordSet: (name, customWords) => set((state) => {
     const newWordSet = Array.from(new Set([...customWords, ...commonWordList]))
