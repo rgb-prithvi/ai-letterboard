@@ -7,12 +7,30 @@ import useTTSStore from '@/store/useTTSStore'
 import analytics from '@/lib/analytics'
 
 export function Letterboard() {
-  const { text, predictions, appendLetter, backspace, clear, selectPrediction, generatePredictions } = useLetterboardStore()
+  const { 
+    text, 
+    predictions, 
+    appendLetter, 
+    backspace, 
+    clear, 
+    selectPrediction, 
+    generatePredictions, 
+    addWordSet,
+    setCurrentWordSet
+  } = useLetterboardStore()
   const { sendUserMessage, sendFullSentence } = useAudioStore()
   const { speak, isLoading } = useTTSStore()
 
+  useEffect(() => {
+    // Add a custom word set when the component mounts
+    addWordSet('custom', ['hello', 'world', 'react', 'nextjs', 'typescript'])
+    // Set it as the current word set
+    setCurrentWordSet('custom')
+  }, [addWordSet, setCurrentWordSet])
+
   const handleClick = (letter: string) => {
     appendLetter(letter)
+    generatePredictions()
     analytics.trackInteraction('button_press', letter)
   }
 
@@ -75,7 +93,7 @@ export function Letterboard() {
               </button>
             ))
           ) : (
-            <div className="text-card-foreground opacity-50 italic">No predictions yet</div>
+            <div className="text-card-foreground opacity-50 italic">No predictions available</div>
           )}
         </div>
       </div>
@@ -127,4 +145,3 @@ export function Letterboard() {
     </div>
   )
 }
-
