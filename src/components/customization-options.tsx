@@ -27,6 +27,8 @@ import { supabase } from "@/lib/supabase";
 import { getSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
 import { UserSettings } from "@/lib/types";
+import { defaultSettings } from "@/lib/constants";
+
 export function CustomizationOptions() {
   const [userSettings, setUserSettings] = useState<UserSettings>({
     theme: "light",
@@ -84,6 +86,34 @@ export function CustomizationOptions() {
         toast({
           title: "Error",
           description: "Failed to save settings. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
+  const resetToDefault = async () => {
+    setIsSaving(true);
+    const session = await getSession();
+    if (session && session.user) {
+      try {
+        await supabase
+          .from("app_user")
+          .update({ settings: defaultSettings })
+          .eq("user_id", session.user.id);
+
+        setUserSettings(defaultSettings);
+
+        toast({
+          title: "Settings reset",
+          description: "Your customization options have been reset to default.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to reset settings. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -255,8 +285,11 @@ export function CustomizationOptions() {
           </Select>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button className="w-full" onClick={saveSettings} disabled={isSaving}>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={resetToDefault} disabled={isSaving}>
+          Reset to Default
+        </Button>
+        <Button onClick={saveSettings} disabled={isSaving}>
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </CardFooter>
