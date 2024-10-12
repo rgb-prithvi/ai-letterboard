@@ -27,15 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { CustomizationOptions } from "./customization-options";
 
 export function SettingsPage() {
   const { data: session } = useSession();
@@ -77,107 +69,7 @@ export function SettingsPage() {
             </Link>
           </nav>
           <div className="grid gap-6">
-            {activeTab === "customization" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Customization Options</CardTitle>
-                  <CardDescription>Customize your input experience</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Input Mode</Label>
-                    <RadioGroup defaultValue="letter" className="flex">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="letter" id="letter" />
-                        <Label htmlFor="letter">Letter Mode</Label>
-                      </div>
-                      <div className="flex items-center space-x-2 ml-4">
-                        <RadioGroupItem value="word" id="word" />
-                        <Label htmlFor="word">Word Mode</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="text-to-speech">Text to speech</Label>
-                    <Switch id="text-to-speech" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="auto-completion">Auto Completion</Label>
-                    <Switch id="auto-completion" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Theme</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select theme" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="text-color">Text Color</Label>
-                    <Input id="text-color" type="color" className="h-10" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="button-color">Button Color</Label>
-                    <Input id="button-color" type="color" className="h-10" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="keyboard-delay">Keyboard action delay (ms)</Label>
-                    <Slider id="keyboard-delay" min={0} max={1000} step={10} defaultValue={[0]} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="font-size">Font Size (px)</Label>
-                    <Slider id="font-size" min={8} max={32} step={1} defaultValue={[12]} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="keyboard-layout">Keyboard Layout</Label>
-                    <Select>
-                      <SelectTrigger id="keyboard-layout">
-                        <SelectValue placeholder="Select layout" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="qwerty">QWERTY</SelectItem>
-                        <SelectItem value="azerty">AZERTY</SelectItem>
-                        <SelectItem value="dvorak">Dvorak</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="font">Font</Label>
-                    <Select>
-                      <SelectTrigger id="font">
-                        <SelectValue placeholder="Select font" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="arial">Arial</SelectItem>
-                        <SelectItem value="times-new-roman">Times New Roman</SelectItem>
-                        <SelectItem value="courier-new">Courier New</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="letter-case">Letter Case</Label>
-                    <Select>
-                      <SelectTrigger id="letter-case">
-                        <SelectValue placeholder="Select case" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="lowercase">lowercase</SelectItem>
-                        <SelectItem value="UPPERCASE">UPPERCASE</SelectItem>
-                        <SelectItem value="Sentence case">Sentence case</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button>Save Changes</Button>
-                </CardFooter>
-              </Card>
-            )}
+            {activeTab === "customization" && <CustomizationOptions />}
             {activeTab === "wordbanks" && (
               <Card>
                 <CardHeader>
