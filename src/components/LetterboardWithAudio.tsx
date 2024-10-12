@@ -3,12 +3,14 @@
 import React, { useEffect } from 'react';
 import { WithAudioPlayback } from './WithAudioPlayback';
 import { Letterboard } from './letterboard';
+import { CommunicationBoard } from './communication-board';
 import ClientAnalyticsWrapper from './ClientAnalyticsWrapper';
 import { useSession } from 'next-auth/react';
 import analytics from '@/lib/analytics';
+import { UserSettings } from '@/lib/types';
 
 interface LetterboardWithAudioProps {
-  userSettings: any; // Replace 'any' with a proper type for your user settings
+  userSettings: UserSettings;
 }
 
 const LetterboardWithAudio: React.FC<LetterboardWithAudioProps> = ({ userSettings }) => {
@@ -20,15 +22,17 @@ const LetterboardWithAudio: React.FC<LetterboardWithAudioProps> = ({ userSetting
     return () => {
       if (session?.user?.id) {
         const boardUsageEnd = new Date();
-        analytics.trackBoardUsage('letterboard', boardUsageStart, boardUsageEnd);
+        analytics.trackBoardUsage(userSettings.inputMode === 'letter' ? 'letterboard' : 'communication-board', boardUsageStart, boardUsageEnd);
       }
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, userSettings.inputMode]);
+
+  const BoardComponent = userSettings.inputMode === 'letter' ? Letterboard : CommunicationBoard;
 
   return (
     <ClientAnalyticsWrapper userId={session?.user?.id}>
       <WithAudioPlayback>
-        <Letterboard userSettings={userSettings} />
+        <BoardComponent userSettings={userSettings} />
       </WithAudioPlayback>
     </ClientAnalyticsWrapper>
   );
