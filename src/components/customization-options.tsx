@@ -28,6 +28,19 @@ import { getSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
 import { UserSettings } from "@/lib/types";
 import { defaultSettings } from "@/lib/constants";
+import { fontOptions } from "@/lib/fonts";
+
+// Add this function at the top of the file, outside of the component
+async function fetchGoogleFonts() {
+  const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY;
+  const response = await fetch(`https://www.googleapis.com/webfonts/v1/webfonts?key=${API_KEY}`);
+  const data = await response.json();
+  return data.items.map((font: any) => ({
+    family: font.family,
+    variants: font.variants,
+    files: font.files,
+  }));
+}
 
 export function CustomizationOptions() {
   const [userSettings, setUserSettings] = useState<UserSettings>({
@@ -40,7 +53,7 @@ export function CustomizationOptions() {
     keyboardDelay: 0,
     fontSize: 18,
     keyboardLayout: "QWERTY",
-    font: "Arial",
+    font: "inter", // Set default font to 'inter'
     letterCase: "lowercase",
   });
 
@@ -207,7 +220,7 @@ export function CustomizationOptions() {
           />
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <div className="flex justify-between">
             <Label htmlFor="keyboard-delay">Keyboard action delay (ms)</Label>
             <span className="text-sm text-muted-foreground">{userSettings.keyboardDelay}ms</span>
@@ -221,7 +234,7 @@ export function CustomizationOptions() {
             onValueChange={(value) => updateSetting("keyboardDelay", value[0])}
             className="w-full"
           />
-        </div>
+        </div> */}
 
         <div className="space-y-2">
           <div className="flex justify-between">
@@ -262,9 +275,11 @@ export function CustomizationOptions() {
               <SelectValue placeholder="Select font" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="arial">Arial</SelectItem>
-              <SelectItem value="times-new-roman">Times New Roman</SelectItem>
-              <SelectItem value="courier-new">Courier New</SelectItem>
+              {fontOptions.map((font) => (
+                <SelectItem key={font.value} value={font.value}>
+                  {font.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

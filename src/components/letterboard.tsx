@@ -7,6 +7,7 @@ import useTTSStore from "@/store/useTTSStore";
 import analytics from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { UserSettings } from "@/lib/types";
+import { fonts } from '@/lib/fonts'
 
 interface LetterboardProps {
   userSettings: UserSettings;
@@ -96,13 +97,19 @@ export function Letterboard({ userSettings }: LetterboardProps) {
   // Calculate grid columns based on keyboard layout
   const gridColumns = userSettings.keyboardLayout === "QWERTY" ? 10 : 9;
 
+  const selectedFont = fonts[userSettings.font as keyof typeof fonts]
+
+  const fontClass = selectedFont?.className || ''
+  const fontStyle = fontClass ? {} : { fontFamily: userSettings.font }
+
   return (
     <div
       className={cn(
         "flex flex-col items-center justify-center min-h-screen p-4",
         userSettings.theme === "dark" ? "bg-gray-900" : "bg-gray-100",
-        userSettings.font,
+        fontClass
       )}
+      style={fontStyle}
     >
       <div className="w-full max-w-4xl mb-4">
         <div

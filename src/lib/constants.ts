@@ -1,5 +1,5 @@
 export const defaultSettings = {
-  font: "Arial",
+  font: "inter",
   theme: "light",
   fontSize: 32,
   inputMode: "letter",
