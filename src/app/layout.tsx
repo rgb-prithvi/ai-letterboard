@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import NextAuthProvider from '@/components/SessionProvider';
-import { TopBarComponent as TopBar } from '@/components/top-bar';
+import NextAuthProvider from "@/components/SessionProvider";
+import { TopBarComponent as TopBar } from "@/components/top-bar";
+import { CSPostHogProvider } from "@/lib/posthog-provider";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -24,8 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <NextAuthProvider>
-          <TopBar />
-          {children}
+          <CSPostHogProvider>
+            <TopBar />
+            {children}
+          </CSPostHogProvider>
         </NextAuthProvider>
       </body>
     </html>
