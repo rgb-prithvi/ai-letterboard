@@ -88,7 +88,7 @@ const CustomKeyboard = () => {
         <Textarea
           value={inputText}
           readOnly
-          className="w-full h-full p-2 text-lg border border-gray-300 rounded"
+          className="w-full h-full p-2 text-4xl border border-gray-300 rounded"
         />
       </div>
       <div
