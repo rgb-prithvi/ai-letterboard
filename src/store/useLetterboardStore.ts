@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { fetchWordSet } from '@/lib/word-selection'
+import { DEFAULT_VOICE_ID } from '@/lib/constants'
 
 interface WordSets {
   [key: string]: string[];
@@ -10,8 +11,8 @@ interface LetterboardStore {
   predictions: string[]
   wordSets: WordSets
   currentWordSet: string
-  appendLetter: (letter: string) => void
-  backspace: () => void
+  appendLetter: (letter: string) => Promise<void>
+  backspace: () => Promise<void>
   clear: () => void
   selectPrediction: (prediction: string) => void
   setText: (newText: string) => void
@@ -23,6 +24,8 @@ interface LetterboardStore {
   isLetterBoard: boolean
   toggleBoard: () => void
   initializeWordSet: () => Promise<void>
+  currentSentence: string
+  playAudio: (text: string) => Promise<void>
 }
 
 const useLetterboardStore = create<LetterboardStore>((set, get) => ({
@@ -32,16 +35,31 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   currentWordSet: 'default',
   selectedWords: [],
   isLetterBoard: true,
-  appendLetter: (letter) => set((state) => {
-    const newText = state.text + letter
-    setTimeout(() => get().generatePredictions(), 0)
-    return { text: newText }
-  }),
-  backspace: () => set((state) => {
-    const newText = state.text.slice(0, -1)
-    setTimeout(() => get().generatePredictions(), 0)
-    return { text: newText }
-  }),
+  currentSentence: '',
+  appendLetter: async (letter: string) => {
+    set((state) => {
+      const newText = state.text + letter
+      const newSentence = state.currentSentence + letter
+      setTimeout(() => get().generatePredictions(), 0)
+      return { text: newText, currentSentence: newSentence }
+    })
+
+    if (letter === ' ' || letter === '.' || letter === '!' || letter === '?') {
+      const { currentSentence, playAudio } = get()
+      await playAudio(currentSentence.trim())
+      set({ currentSentence: '' })
+    } else {
+      await get().playAudio(letter)
+    }
+  },
+  backspace: async () => {
+    set((state) => {
+      const newText = state.text.slice(0, -1)
+      const newSentence = state.currentSentence.slice(0, -1)
+      setTimeout(() => get().generatePredictions(), 0)
+      return { text: newText, currentSentence: newSentence }
+    })
+  },
   clear: () => set({ text: '' }),
   selectPrediction: (prediction) => set((state) => {
     const words = state.text.split(' ')
@@ -79,6 +97,39 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     const words = await fetchWordSet()
     set({ wordSets: { default: words } })
     get().generatePredictions()
+  },
+  playAudio: async (text: string) => {
+    const response = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice_id: DEFAULT_VOICE_ID }),
+    });
+
+    if (!response.ok) {
+      console.error('TTS request failed');
+      return;
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) return;
+
+    const audio = new Audio();
+    audio.src = URL.createObjectURL(new Blob([], { type: 'audio/mpeg' }));
+
+    const pump = async () => {
+      const { done, value } = await reader.read();
+      if (done) return;
+
+      const blob = new Blob([value], { type: 'audio/mpeg' });
+      const url = URL.createObjectURL(blob);
+      audio.src = url;
+      await audio.play();
+
+      URL.revokeObjectURL(url);
+      await pump();
+    };
+
+    await pump();
   },
 }))
 

@@ -46,3 +46,6 @@ export const commonWords: CommonWord[] = [
   { rank: "29", word: "hear" },
   { rank: "30", word: "feel" },
 ];
+
+export const ELEVENLABS_API_KEY = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "";
+export const DEFAULT_VOICE_ID = "Daniel";
