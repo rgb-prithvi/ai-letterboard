@@ -58,8 +58,8 @@ const InputWrapper: React.FC<InputWrapperProps> = ({ userSettings }) => {
   // }, [userSettings.inputMode]);
 
   const handleWordSelect = (word: string) => {
-    // TODO: Implement word selection logic
     console.log("Selected word:", word);
+    // Implement word selection logic here
   };
 
   if (userSettings.inputMode === "word") {

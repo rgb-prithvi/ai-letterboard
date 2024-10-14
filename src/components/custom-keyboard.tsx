@@ -1,28 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Eraser, Check } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useState } from "react";
+import KeyboardBase from "./keyboard-base";
 
-const CustomKeyboard = () => {
-  const [inputText, setInputText] = useState("");
-  const [isLandscape, setIsLandscape] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState("60%");
+const CustomKeyboard: React.FC = () => {
   const [isNumeric, setIsNumeric] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const checkOrientation = () => {
-      const landScapeView = window.innerWidth > window.innerHeight && window.innerHeight < 700;
-      setIsLandscape(landScapeView);
-      setKeyboardHeight(landScapeView ? "80%" : "60%");
-    };
-
-    checkOrientation();
-    window.addEventListener("resize", checkOrientation);
-
-    return () => window.removeEventListener("resize", checkOrientation);
-  }, []);
 
   const alphaKeys = [
     ["A", "B", "C", "D", "E"],
@@ -42,23 +24,8 @@ const CustomKeyboard = () => {
     ["(", ")", "."],
   ];
 
-  const handleKeyPress = (key: string) => {
-    setInputText((prevText) => prevText + key);
-  };
-
-  const handleBackspace = () => {
-    setInputText((prevText) => prevText.slice(0, -1));
-  };
-
-  const handleSpace = () => {
-    setInputText((prevText) => prevText + " ");
-  };
-
-  const toggleKeyboard = () => {
-    setIsNumeric((prev) => !prev);
-  };
-
-  const renderKeys = (keys: string[][]) => {
+  const renderKeys = () => {
+    const keys = isNumeric ? numericKeys : alphaKeys;
     return keys.map((row, rowIndex) => (
       <div key={rowIndex} className="flex justify-between mb-2 flex-1">
         {row.map((key) => (
@@ -74,65 +41,33 @@ const CustomKeyboard = () => {
     ));
   };
 
-  const handleClear = () => {
-    setInputText("");
+  const handleKeyPress = (key: string) => {
+    // This function will be called by KeyboardBase
   };
 
-  const handleSubmit = () => {
-    console.log(inputText);
+  const handleSubmit = (text: string) => {
+    console.log(text);
+    // Add your submit logic here
   };
 
-  return (
-    <div ref={containerRef} className="flex flex-col h-full bg-gray-100">
-      <div className="flex-grow overflow-auto p-4">
-        <Textarea
-          value={inputText}
-          readOnly
-          className="w-full h-full p-2 text-4xl border border-gray-300 rounded"
-        />
-      </div>
-      <div
-        className="flex-shrink-0 flex flex-col bg-gray-200 p-2"
-        style={{ height: keyboardHeight }}
+  const extraButtons = (
+    <>
+      <button
+        onClick={() => setIsNumeric((prev) => !prev)}
+        className="flex-1 mx-0.5 text-sm bg-white rounded-lg shadow flex items-center justify-center"
       >
-        <div className="flex-1 flex flex-col justify-between">
-          {isNumeric ? renderKeys(numericKeys) : renderKeys(alphaKeys)}
-          <div className="flex justify-between flex-1">
-            <button
-              onClick={handleBackspace}
-              className="flex-1 mx-0.5 text-lg bg-white rounded-lg shadow flex items-center justify-center"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <button
-              onClick={handleClear}
-              className="flex-1 mx-0.5 text-lg bg-white rounded-lg shadow flex items-center justify-center"
-            >
-              <Eraser size={20} />
-            </button>
-            <button
-              onClick={toggleKeyboard}
-              className="flex-1 mx-0.5 text-sm bg-white rounded-lg shadow flex items-center justify-center"
-            >
-              {isNumeric ? "ABC" : "123"}
-            </button>
-            <button
-              onClick={handleSpace}
-              className="flex-grow-[3] mx-0.5 text-sm bg-white rounded-lg shadow flex items-center justify-center"
-            >
-              Space
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="flex-1 mx-0.5 text-sm bg-blue-600 text-white rounded-lg shadow flex items-center justify-center"
-            >
-              <Check size={20} />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        {isNumeric ? "ABC" : "123"}
+      </button>
+      <button
+        onClick={() => handleKeyPress(" ")}
+        className="flex-grow-[3] mx-0.5 text-sm bg-white rounded-lg shadow flex items-center justify-center"
+      >
+        Space
+      </button>
+    </>
   );
+
+  return <KeyboardBase renderKeys={renderKeys} onSubmit={handleSubmit} extraButtons={extraButtons} />;
 };
 
 export default CustomKeyboard;

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
+import KeyboardBase from "./keyboard-base";
 import { Word } from "@/lib/types";
 
 interface WordBoardProps {
@@ -10,20 +10,31 @@ interface WordBoardProps {
 }
 
 const WordBoard: React.FC<WordBoardProps> = ({ words, onWordSelect }) => {
-  return (
-    <div className="grid grid-cols-3 gap-2 p-2 bg-gray-100 rounded-lg">
+  const renderKeys = () => (
+    <div className="grid grid-cols-3 gap-2">
       {words.map((word, index) => (
-        <Button
+        <button
           key={index}
-          variant="outline"
-          className="w-full text-sm"
-          onClick={() => onWordSelect(word.text)}
+          onClick={() => handleKeyPress(word.text)}
+          className="w-full text-sm bg-white rounded-lg shadow flex items-center justify-center p-2"
         >
           {word.text}
-        </Button>
+        </button>
       ))}
     </div>
   );
+
+  const handleKeyPress = (word: string) => {
+    // This function will be called by KeyboardBase
+    onWordSelect(word);
+  };
+
+  const handleSubmit = (text: string) => {
+    console.log(text);
+    // Add your submit logic here
+  };
+
+  return <KeyboardBase renderKeys={renderKeys} onSubmit={handleSubmit} />;
 };
 
 export default WordBoard;
