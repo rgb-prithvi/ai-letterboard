@@ -53,18 +53,20 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   const handleSubmit = async () => {
     if (text.trim()) {
       setSubmitStatus("submitting");
-      try {
-        await playAudio(text.trim());
-        if (session?.user?.id) {
-          await logInteraction("text_submit", text.trim(), session.user.id);
+      if (userSettings.textToSpeech) {
+        try {
+          await playAudio(text.trim());
+          if (session?.user?.id) {
+            await logInteraction("text_submit", text.trim(), session.user.id);
+          }
+          onSubmit(text);
+          setSubmitStatus("success");
+        } catch (error) {
+          console.error("Error submitting text:", error);
+          setSubmitStatus("error");
+        } finally {
+          setTimeout(() => setSubmitStatus("idle"), 2000); // Reset status after 2 seconds
         }
-        onSubmit(text);
-        setSubmitStatus("success");
-      } catch (error) {
-        console.error("Error submitting text:", error);
-        setSubmitStatus("error");
-      } finally {
-        setTimeout(() => setSubmitStatus("idle"), 2000); // Reset status after 2 seconds
       }
     }
   };
@@ -120,17 +122,19 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
         />
       </div>
       <div className="flex-shrink-0 p-2 bg-gray-200">
-        <div className="flex justify-center space-x-2">
-          {predictions.map((prediction, index) => (
-            <button
-              key={index}
-              onClick={() => selectPrediction(prediction)}
-              className="px-3 py-1 text-sm bg-white rounded-lg shadow"
-            >
-              {prediction}
-            </button>
-          ))}
-        </div>
+        {userSettings.autoCompletion && (
+          <div className="flex justify-center space-x-2">
+            {predictions.map((prediction, index) => (
+              <button
+                key={index}
+                onClick={() => selectPrediction(prediction)}
+                className="px-3 py-1 text-sm bg-white rounded-lg shadow"
+              >
+                {prediction}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div
         className="flex flex-col flex-grow p-2"
@@ -175,9 +179,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
             onClick={() => appendLetter(" ")}
             className="w-full h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
-          >
-            Space
-          </button>
+          />
         </div>
       </div>
     </div>
