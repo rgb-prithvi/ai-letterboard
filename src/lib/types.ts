@@ -22,3 +22,8 @@ export interface WordBank {
   name: string;
   words: Word[];
 }
+
+export type CommonWord = {
+  rank: string;
+  word: string;
+};
