@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -46,6 +47,7 @@ export function CustomizationOptions() {
 
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     fetchUserSettings();
@@ -82,6 +84,9 @@ export function CustomizationOptions() {
           title: "Settings saved",
           description: "Your customization options have been updated.",
         });
+
+        // Refresh the page in a Next.js friendly way
+        router.refresh();
       } catch (error) {
         toast({
           title: "Error",

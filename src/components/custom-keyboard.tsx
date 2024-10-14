@@ -4,6 +4,7 @@ import React from "react";
 import KeyboardBase from "./keyboard-base";
 import useLetterboardStore from "@/store/useLetterboardStore";
 import { UserSettings } from "@/lib/types";
+import { fonts } from "@/lib/fonts";
 
 interface CustomKeyboardProps {
   isLetterBoard: boolean;
@@ -13,13 +14,21 @@ interface CustomKeyboardProps {
 const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSettings }) => {
   const { appendLetter, toggleBoard } = useLetterboardStore();
 
-  const alphaKeys = [
+  const abcdKeys = [
     ["A", "B", "C", "D", "E"],
     ["F", "G", "H", "I", "J"],
     ["K", "L", "M", "N", "O"],
     ["P", "Q", "R", "S", "T"],
     ["U", "V", "W", "X", "Y"],
     ["Z", "!", "#", "&", "?"],
+  ];
+
+  const qwertyKeys = [
+    ["Q", "W", "E", "R", "T", "Y"],
+    ["U", "I", "O", "P", "!", "#"],
+    ["A", "S", "D", "F", "G", "H"],
+    ["J", "K", "L", "&", "?", "Z"],
+    ["X", "C", "V", "B", "N", "M"],
   ];
 
   const numericKeys = [
@@ -32,7 +41,15 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSett
   ];
 
   const renderKeys = () => {
-    const keys = isLetterBoard ? alphaKeys : numericKeys;
+    let keys;
+    if (!isLetterBoard) {
+      keys = numericKeys;
+    } else {
+      keys = userSettings.keyboardLayout === "qwerty" ? qwertyKeys : abcdKeys;
+    }
+
+    const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || '';
+
     return (
       <div className="flex flex-col h-full">
         {keys.map((row, rowIndex) => (
@@ -41,7 +58,7 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSett
               <button
                 key={key}
                 onClick={() => appendLetter(userSettings.letterCase === "uppercase" ? key.toUpperCase() : key.toLowerCase())}
-                className="flex-1 mx-0.5 rounded-lg shadow flex items-center justify-center h-full"
+                className={`flex-1 mx-0.5 rounded-lg shadow flex items-center justify-center h-full ${fontClass}`}
                 style={{
                   backgroundColor: userSettings.buttonColor,
                   color: userSettings.textColor,

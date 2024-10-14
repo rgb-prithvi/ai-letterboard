@@ -6,7 +6,9 @@ import { RotateCcw } from "lucide-react";
 import { fetchAndGenerateWordBoard } from "@/lib/word-selection";
 import useLetterboardStore from "@/store/useLetterboardStore";
 import { useToast } from "@/components/ui/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserSettings } from "@/lib/types";
+import { fonts } from "@/lib/fonts";
 
 interface WordBoardProps {
   userSettings: UserSettings;
@@ -49,17 +51,19 @@ const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
   };
 
   const renderKeys = () => {
+    const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
+
     if (isLoading) {
       return (
-        <div className="flex items-center justify-center h-full">
-          <p>Loading words...</p>
+        <div className={`flex items-center justify-center h-full ${fontClass}`}>
+          <Skeleton className="w-full h-full" />
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="flex items-center justify-center h-full">
+        <div className={`flex items-center justify-center h-full ${fontClass}`}>
           <p className="text-red-500">{error}</p>
         </div>
       );
@@ -67,7 +71,7 @@ const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
 
     if (selectedWords.length === 0) {
       return (
-        <div className="flex items-center justify-center h-full">
+        <div className={`flex items-center justify-center h-full ${fontClass}`}>
           <p>No words available. Please refresh or check your word bank.</p>
         </div>
       );
@@ -79,7 +83,7 @@ const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
           <button
             key={index}
             onClick={() => onWordSelect(word)}
-            className="rounded-lg shadow flex items-center justify-center"
+            className={`rounded-lg shadow flex items-center justify-center ${fontClass}`}
             style={{
               backgroundColor: userSettings.buttonColor,
               color: userSettings.textColor,
@@ -100,7 +104,7 @@ const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
       extraButtons={
         <button
           onClick={refreshWords}
-          className="flex-1 h-12 rounded-lg shadow flex items-center justify-center"
+          className={`flex-1 h-12 rounded-lg shadow flex items-center justify-center ${fonts[userSettings.font as keyof typeof fonts]?.className || ""}`}
           style={{
             backgroundColor: userSettings.buttonColor,
             color: userSettings.textColor,
