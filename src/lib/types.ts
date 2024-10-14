@@ -13,7 +13,12 @@ export interface UserSettings {
 }
 
 export interface Word {
-  text: string;
-  topicRelevance: number;
-  frequency: number;
+  word: string;
+  is_highlighted: boolean;
+}
+
+export interface WordBank {
+  id: number;
+  name: string;
+  words: Word[];
 }

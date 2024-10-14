@@ -3,20 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertCircle, X, Edit2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-interface Word {
-  id: number;
-  word: string;
-  is_highlighted: boolean;
-}
-
-interface WordBank {
-  id: number;
-  name: string;
-  words: Word[];
-}
+import { WordBankReview } from "@/components/WordBankReview";
+import { Word, WordBank } from "@/lib/types";
 
 interface ManageBanksModalProps {
   isOpen: boolean;
@@ -34,7 +24,6 @@ export function ManageBanksModal({
   onDeleteBank,
 }: ManageBanksModalProps) {
   const [editingBank, setEditingBank] = useState<WordBank | null>(null);
-  const [editingWordIndex, setEditingWordIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleEdit = (bank: WordBank) => {
@@ -44,7 +33,7 @@ export function ManageBanksModal({
 
   const handleSave = () => {
     if (editingBank) {
-      if (editingBank.words.filter(w => w.is_highlighted).length === 0) {
+      if (editingBank.words.filter((w) => w.is_highlighted).length === 0) {
         setError("Please include at least one highlighted word in the bank.");
         return;
       }
@@ -59,7 +48,7 @@ export function ManageBanksModal({
       const updatedWords = [...editingBank.words];
       updatedWords[index] = {
         ...updatedWords[index],
-        is_highlighted: !updatedWords[index].is_highlighted
+        is_highlighted: !updatedWords[index].is_highlighted,
       };
       setEditingBank({ ...editingBank, words: updatedWords });
     }
@@ -72,16 +61,11 @@ export function ManageBanksModal({
     }
   };
 
-  const handleEditWord = (index: number) => {
-    setEditingWordIndex(index);
-  };
-
-  const handleSaveEdit = (index: number, newWord: string) => {
-    if (editingBank && newWord.trim() !== "") {
+  const handleEditWord = (index: number, newWord: string) => {
+    if (editingBank) {
       const updatedWords = [...editingBank.words];
-      updatedWords[index] = { ...updatedWords[index], word: newWord.trim() };
+      updatedWords[index] = { ...updatedWords[index], word: newWord };
       setEditingBank({ ...editingBank, words: updatedWords });
-      setEditingWordIndex(null);
     }
   };
 
@@ -115,55 +99,12 @@ export function ManageBanksModal({
               onChange={(e) => setEditingBank({ ...editingBank, name: e.target.value })}
             />
             <Label>Words</Label>
-            <div className="max-h-60 overflow-y-auto border rounded p-2">
-              {editingBank.words.map((word, index) => (
-                <div key={index} className="flex items-center justify-between py-1">
-                  {editingWordIndex === index ? (
-                    <Input
-                      value={word.word}
-                      onChange={(e) => handleSaveEdit(index, e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && handleSaveEdit(index, (e.target as HTMLInputElement).value)}
-                      className="flex-grow mr-2"
-                    />
-                  ) : (
-                    <span className="flex-grow">{word.word}</span>
-                  )}
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant={word.is_highlighted ? "secondary" : "outline"}
-                      size="sm"
-                      onClick={() => handleToggleHighlight(index)}
-                    >
-                      {word.is_highlighted ? "Highlighted" : "Highlight"}
-                    </Button>
-                    {editingWordIndex === index ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSaveEdit(index, word.word)}
-                      >
-                        Save
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditWord(index)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveWord(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <WordBankReview
+              words={editingBank.words}
+              onToggleHighlight={handleToggleHighlight}
+              onRemoveWord={handleRemoveWord}
+              onEditWord={handleEditWord}
+            />
             <Button onClick={handleSave}>Save Changes</Button>
             {error && (
               <Alert variant="destructive">

@@ -1,43 +1,37 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WordBankReview } from "@/components/WordBankReview";
 import { Word } from "@/lib/types";
 
-interface CreateBankModalProps {
+interface GenerateBankModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateBank: (name: string, words: Word[]) => void;
 }
 
-export function CreateBankModal({ isOpen, onClose, onCreateBank }: CreateBankModalProps) {
+export function GenerateBankModal({ isOpen, onClose, onCreateBank }: GenerateBankModalProps) {
   const [name, setName] = useState("");
-  const [rawInput, setRawInput] = useState("");
+  const [description, setDescription] = useState("");
+  const [wordCount, setWordCount] = useState(20);
   const [words, setWords] = useState<Word[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"input" | "review">("input");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const processWords = (input: string): Word[] => {
-    return input
-      .split(/[,\n]/)
-      .map((word) => word.trim())
-      .filter((word) => word !== "")
-      .map((word) => ({ word, is_highlighted: false }));
-  };
-
-  const handleNextStep = () => {
-    const processedWords = processWords(rawInput);
-    if (processedWords.length === 0) {
-      setError("Please enter at least one word.");
-      return;
-    }
-    setWords(processedWords);
+  const handleGenerate = async () => {
+    // TODO: Implement AI generation logic here
+    // For now, we'll use placeholder data
+    const generatedWords: Word[] = Array.from({ length: wordCount }, (_, i) => ({
+      word: `Word ${i + 1}`,
+      is_highlighted: false,
+    }));
+    setWords(generatedWords);
     setStep("review");
     setError(null);
   };
@@ -50,7 +44,8 @@ export function CreateBankModal({ isOpen, onClose, onCreateBank }: CreateBankMod
 
   const resetForm = () => {
     setName("");
-    setRawInput("");
+    setDescription("");
+    setWordCount(20);
     setWords([]);
     setError(null);
     setStep("input");
@@ -72,23 +67,13 @@ export function CreateBankModal({ isOpen, onClose, onCreateBank }: CreateBankMod
     setWords(words.map((word, i) => (i === index ? { ...word, word: newWord } : word)));
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setRawInput(content);
-      };
-      reader.readAsText(file);
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{step === "input" ? "Create New Word Bank" : "Review Words"}</DialogTitle>
+          <DialogTitle>
+            {step === "input" ? "Generate Word Bank with AI" : "Review Generated Words"}
+          </DialogTitle>
         </DialogHeader>
         {step === "input" ? (
           <div className="space-y-4">
@@ -102,26 +87,27 @@ export function CreateBankModal({ isOpen, onClose, onCreateBank }: CreateBankMod
               />
             </div>
             <div>
-              <Label htmlFor="bank-words">Words (comma-separated or one per line)</Label>
+              <Label htmlFor="bank-description">Description (optional)</Label>
               <Textarea
-                id="bank-words"
-                value={rawInput}
-                onChange={(e) => setRawInput(e.target.value)}
-                placeholder="Enter words, separated by commas or new lines"
-                rows={5}
+                id="bank-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter a description for the AI to use"
+                rows={3}
               />
             </div>
             <div>
-              <Label htmlFor="file-upload">Upload TXT or CSV file</Label>
-              <Input
-                id="file-upload"
-                type="file"
-                accept=".txt,.csv"
-                onChange={handleFileUpload}
-                ref={fileInputRef}
+              <Label htmlFor="word-count">Number of Words: {wordCount}</Label>
+              <Slider
+                id="word-count"
+                min={5}
+                max={100}
+                step={1}
+                value={[wordCount]}
+                onValueChange={(value) => setWordCount(value[0])}
               />
             </div>
-            <Button onClick={handleNextStep}>Next</Button>
+            <Button onClick={handleGenerate}>Generate Words</Button>
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />

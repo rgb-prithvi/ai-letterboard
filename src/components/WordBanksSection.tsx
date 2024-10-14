@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -9,27 +9,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreateBankModal } from "./CreateBankModal";
-import { ManageBanksModal } from "./ManageBanksModal";
+import { CreateBankModal } from "@/components/CreateBankModal";
+import { ManageBanksModal } from "@/components/ManageBanksModal";
+import { GenerateBankModal } from "@/components/GenerateBankModal";
 import { supabase } from "@/lib/supabase";
 import { getSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Word {
-  id: number;
-  word: string;
-  is_highlighted: boolean;
-}
-
-interface WordBank {
-  id: number;
-  name: string;
-  words: Word[];
-}
+import { Word, WordBank } from "@/lib/types";
 
 export function WordBanksSection() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [wordBanks, setWordBanks] = useState<WordBank[]>([]);
   const [currentWordBank, setCurrentWordBank] = useState<number | null>(null);
   const { toast } = useToast();
@@ -58,7 +49,10 @@ export function WordBanksSection() {
       const { data: words, error: wordsError } = await supabase
         .from("words")
         .select("*")
-        .in("word_bank_id", banks.map(bank => bank.id));
+        .in(
+          "word_bank_id",
+          banks.map((bank) => bank.id),
+        );
 
       if (wordsError) {
         toast({
@@ -69,9 +63,9 @@ export function WordBanksSection() {
         return;
       }
 
-      const wordBanksWithWords = banks.map(bank => ({
+      const wordBanksWithWords = banks.map((bank) => ({
         ...bank,
-        words: words.filter(word => word.word_bank_id === bank.id)
+        words: words.filter((word) => word.word_bank_id === bank.id),
       }));
 
       setWordBanks(wordBanksWithWords);
@@ -102,7 +96,7 @@ export function WordBanksSection() {
       const wordsToInsert = words.map(({ word, is_highlighted }) => ({
         word_bank_id: bank.id,
         word,
-        is_highlighted
+        is_highlighted,
       }));
 
       const { data: insertedWords, error: wordsError } = await supabase
@@ -132,7 +126,7 @@ export function WordBanksSection() {
     const { data: updatedBank, error: bankError } = await supabase
       .from("word_banks")
       .update({ name })
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -145,10 +139,7 @@ export function WordBanksSection() {
       return;
     }
 
-    const { error: deleteError } = await supabase
-      .from("words")
-      .delete()
-      .eq('word_bank_id', id);
+    const { error: deleteError } = await supabase.from("words").delete().eq("word_bank_id", id);
 
     if (deleteError) {
       toast({
@@ -162,7 +153,7 @@ export function WordBanksSection() {
     const wordsToInsert = words.map(({ word, is_highlighted }) => ({
       word_bank_id: id,
       word,
-      is_highlighted
+      is_highlighted,
     }));
 
     const { data: insertedWords, error: insertError } = await supabase
@@ -180,7 +171,7 @@ export function WordBanksSection() {
     }
 
     const updatedBankWithWords = { ...updatedBank, words: insertedWords };
-    setWordBanks(wordBanks.map(bank => bank.id === id ? updatedBankWithWords : bank));
+    setWordBanks(wordBanks.map((bank) => (bank.id === id ? updatedBankWithWords : bank)));
     toast({
       title: "Success",
       description: "Word bank updated successfully.",
@@ -188,10 +179,7 @@ export function WordBanksSection() {
   };
 
   const handleDeleteBank = async (id: number) => {
-    const { error } = await supabase
-      .from("word_banks")
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("word_banks").delete().eq("id", id);
 
     if (error) {
       toast({
@@ -200,7 +188,7 @@ export function WordBanksSection() {
         variant: "destructive",
       });
     } else {
-      setWordBanks(wordBanks.filter(bank => bank.id !== id));
+      setWordBanks(wordBanks.filter((bank) => bank.id !== id));
       if (currentWordBank === id) {
         setCurrentWordBank(wordBanks[0]?.id || null);
       }
@@ -220,7 +208,10 @@ export function WordBanksSection() {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="word-bank-select">Select Word Bank</Label>
-          <Select value={currentWordBank?.toString()} onValueChange={(value) => setCurrentWordBank(Number(value))}>
+          <Select
+            value={currentWordBank?.toString()}
+            onValueChange={(value) => setCurrentWordBank(Number(value))}
+          >
             <SelectTrigger id="word-bank-select">
               <SelectValue placeholder="Choose a word bank" />
             </SelectTrigger>
@@ -234,18 +225,28 @@ export function WordBanksSection() {
           </Select>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}>Create New Bank</Button>
+          <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}>
+            Create New Bank
+          </Button>
+          <Button variant="outline" onClick={() => setIsGenerateModalOpen(true)}>
+            Generate Bank with AI
+          </Button>
           <Button onClick={() => setIsManageModalOpen(true)}>Manage Banks</Button>
         </div>
       </CardContent>
-      <CreateBankModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
+      <CreateBankModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         onCreateBank={handleCreateBank}
       />
-      <ManageBanksModal 
-        isOpen={isManageModalOpen} 
-        onClose={() => setIsManageModalOpen(false)} 
+      <GenerateBankModal
+        isOpen={isGenerateModalOpen}
+        onClose={() => setIsGenerateModalOpen(false)}
+        onCreateBank={handleCreateBank}
+      />
+      <ManageBanksModal
+        isOpen={isManageModalOpen}
+        onClose={() => setIsManageModalOpen(false)}
         wordBanks={wordBanks}
         onUpdateBank={handleUpdateBank}
         onDeleteBank={handleDeleteBank}
