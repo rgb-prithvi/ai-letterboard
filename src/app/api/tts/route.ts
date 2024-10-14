@@ -1,39 +1,33 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { Readable } from "stream";
 
-export async function POST(request: Request) {
-  const { text } = await request.json();
+export async function POST(request: NextRequest) {
+  const { text, voice_id } = await request.json();
 
-  if (!text) {
-    return NextResponse.json({ error: 'Text is required' }, { status: 400 });
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice_id}/stream`, {
+    method: "POST",
+    headers: {
+      "xi-api-key": process.env.ELEVENLABS_API_KEY || "",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    return NextResponse.json({ error: "TTS request failed" }, { status: response.status });
   }
 
-  try {
-    const response = await fetch('https://api.openai.com/v1/audio/speech', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'tts-1-hd',
-        input: text,
-        voice: 'echo',
-      }),
-    });
+  // Create a TransformStream to convert the ReadableStream to a Web-compatible stream
+  const { readable, writable } = new TransformStream();
 
-    if (!response.ok) {
-      throw new Error('Failed to generate speech');
-    }
+  // Pipe the response body to the TransformStream
+  response.body?.pipeTo(writable);
 
-    const audioBuffer = await response.arrayBuffer();
-    return new NextResponse(audioBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'audio/mpeg',
-      },
-    });
-  } catch (error) {
-    console.error('Error in TTS API:', error);
-    return NextResponse.json({ error: 'Failed to generate speech' }, { status: 500 });
-  }
+  // Return a streaming response
+  return new NextResponse(readable, {
+    headers: {
+      "Content-Type": "audio/mpeg",
+      "Transfer-Encoding": "chunked",
+    },
+  });
 }
