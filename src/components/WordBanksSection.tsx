@@ -15,10 +15,16 @@ import { supabase } from "@/lib/supabase";
 import { getSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
 
+interface Word {
+  id: number;
+  word: string;
+  is_highlighted: boolean;
+}
+
 interface WordBank {
   id: number;
   name: string;
-  words: string[];
+  words: Word[];
 }
 
 export function WordBanksSection() {
@@ -35,72 +41,150 @@ export function WordBanksSection() {
   const fetchWordBanks = async () => {
     const session = await getSession();
     if (session && session.user) {
-      const { data, error } = await supabase
+      const { data: banks, error: banksError } = await supabase
         .from("word_banks")
         .select("*")
         .eq("user_id", session.user.id);
 
-      if (error) {
+      if (banksError) {
         toast({
           title: "Error",
           description: "Failed to fetch word banks. Please try again.",
           variant: "destructive",
         });
-      } else if (data) {
-        setWordBanks(data);
-        if (data.length > 0 && !currentWordBank) {
-          setCurrentWordBank(data[0].id);
-        }
+        return;
+      }
+
+      const { data: words, error: wordsError } = await supabase
+        .from("words")
+        .select("*")
+        .in("word_bank_id", banks.map(bank => bank.id));
+
+      if (wordsError) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch words. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const wordBanksWithWords = banks.map(bank => ({
+        ...bank,
+        words: words.filter(word => word.word_bank_id === bank.id)
+      }));
+
+      setWordBanks(wordBanksWithWords);
+      if (wordBanksWithWords.length > 0 && !currentWordBank) {
+        setCurrentWordBank(wordBanksWithWords[0].id);
       }
     }
   };
 
-  const handleCreateBank = async (name: string, words: string[]) => {
+  const handleCreateBank = async (name: string, words: Word[]) => {
     const session = await getSession();
     if (session && session.user) {
-      const { data, error } = await supabase
+      const { data: bank, error: bankError } = await supabase
         .from("word_banks")
-        .insert({ user_id: session.user.id, name, words })
+        .insert({ user_id: session.user.id, name })
         .select()
         .single();
 
-      if (error) {
+      if (bankError) {
         toast({
           title: "Error",
           description: "Failed to create word bank. Please try again.",
           variant: "destructive",
         });
-      } else if (data) {
-        setWordBanks([...wordBanks, data]);
-        toast({
-          title: "Success",
-          description: "Word bank created successfully.",
-        });
+        return;
       }
+
+      const wordsToInsert = words.map(({ word, is_highlighted }) => ({
+        word_bank_id: bank.id,
+        word,
+        is_highlighted
+      }));
+
+      const { data: insertedWords, error: wordsError } = await supabase
+        .from("words")
+        .insert(wordsToInsert)
+        .select();
+
+      if (wordsError) {
+        toast({
+          title: "Error",
+          description: "Failed to add words to the bank. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const newBank = { ...bank, words: insertedWords };
+      setWordBanks([...wordBanks, newBank]);
+      toast({
+        title: "Success",
+        description: "Word bank created successfully.",
+      });
     }
   };
 
-  const handleUpdateBank = async (id: number, name: string, words: string[]) => {
-    const { data, error } = await supabase
+  const handleUpdateBank = async (id: number, name: string, words: Word[]) => {
+    const { data: updatedBank, error: bankError } = await supabase
       .from("word_banks")
-      .update({ name, words })
+      .update({ name })
       .eq('id', id)
       .select()
       .single();
 
-    if (error) {
+    if (bankError) {
       toast({
         title: "Error",
         description: "Failed to update word bank. Please try again.",
         variant: "destructive",
       });
-    } else if (data) {
-      setWordBanks(wordBanks.map(bank => bank.id === id ? data : bank));
-      toast({
-        title: "Success",
-        description: "Word bank updated successfully.",
-      });
+      return;
     }
+
+    const { error: deleteError } = await supabase
+      .from("words")
+      .delete()
+      .eq('word_bank_id', id);
+
+    if (deleteError) {
+      toast({
+        title: "Error",
+        description: "Failed to update words. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const wordsToInsert = words.map(({ word, is_highlighted }) => ({
+      word_bank_id: id,
+      word,
+      is_highlighted
+    }));
+
+    const { data: insertedWords, error: insertError } = await supabase
+      .from("words")
+      .insert(wordsToInsert)
+      .select();
+
+    if (insertError) {
+      toast({
+        title: "Error",
+        description: "Failed to update words. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updatedBankWithWords = { ...updatedBank, words: insertedWords };
+    setWordBanks(wordBanks.map(bank => bank.id === id ? updatedBankWithWords : bank));
+    toast({
+      title: "Success",
+      description: "Word bank updated successfully.",
+    });
   };
 
   const handleDeleteBank = async (id: number) => {
