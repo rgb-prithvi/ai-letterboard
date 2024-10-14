@@ -3,25 +3,23 @@
 import React, { useState, useEffect } from "react";
 import KeyboardBase from "./keyboard-base";
 import { Word } from "@/lib/types";
-import { selectWords, TOTAL_WORD_COUNT } from "@/lib/word-selection";
+import { selectWords } from "@/lib/word-selection";
 import { RotateCcw } from "lucide-react";
 
-interface WordBoardProps {
-  wordBank: Word[];
-  topic: string;
-  onWordSelect: (word: string) => void;
-}
-
-const WordBoard: React.FC<WordBoardProps> = ({ wordBank, topic, onWordSelect }) => {
+const WordBoard: React.FC = () => {
   const [selectedWords, setSelectedWords] = useState<Word[]>([]);
+
+  const refreshWords = () => {
+    setSelectedWords(selectWords());
+  };
 
   useEffect(() => {
     refreshWords();
-  }, [wordBank, topic]);
+  }, []);
 
-  const refreshWords = () => {
-    const newWords = selectWords(wordBank, topic);
-    setSelectedWords(newWords);
+  const onWordSelect = (word: string) => {
+    // Implement word selection logic here if needed
+    console.log(`Selected word: ${word}`);
   };
 
   const renderKeys = ({ handleKeyPress }) => {
@@ -46,9 +44,9 @@ const WordBoard: React.FC<WordBoardProps> = ({ wordBank, topic, onWordSelect }) 
   };
 
   return (
-    <KeyboardBase 
-      renderKeys={renderKeys} 
-      onSubmit={(text) => console.log(text)} 
+    <KeyboardBase
+      renderKeys={renderKeys}
+      onSubmit={(text) => console.log(text)}
       extraButtons={
         <button
           onClick={refreshWords}

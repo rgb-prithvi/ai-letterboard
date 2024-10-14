@@ -13,7 +13,7 @@ import { CreateBankModal } from "@/components/CreateBankModal";
 import { ManageBanksModal } from "@/components/ManageBanksModal";
 import { GenerateBankModal } from "@/components/GenerateBankModal";
 import { supabase } from "@/lib/supabase";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
 import { Word, WordBank } from "@/lib/types";
 
@@ -24,6 +24,7 @@ export function WordBanksSection() {
   const [wordBanks, setWordBanks] = useState<WordBank[]>([]);
   const [currentWordBank, setCurrentWordBank] = useState<number | null>(null);
   const { toast } = useToast();
+  const { data: session } = useSession();
 
   useEffect(() => {
     fetchWordBanks();
@@ -69,8 +70,11 @@ export function WordBanksSection() {
       }));
 
       setWordBanks(wordBanksWithWords);
-      if (wordBanksWithWords.length > 0 && !currentWordBank) {
-        setCurrentWordBank(wordBanksWithWords[0].id);
+      
+      // Find the selected word bank or default to the first one
+      const selectedBank = wordBanksWithWords.find(bank => bank.is_selected) || wordBanksWithWords[0];
+      if (selectedBank) {
+        setCurrentWordBank(selectedBank.id);
       }
     }
   };
@@ -199,6 +203,45 @@ export function WordBanksSection() {
     }
   };
 
+  // Add this new function
+  const handleWordBankSelection = async (value: string) => {
+    const newSelectedBankId = Number(value);
+    setCurrentWordBank(newSelectedBankId);
+
+    if (session?.user?.id) {
+      const { data, error } = await supabase
+        .from("word_banks")
+        .update({ is_selected: false })
+        .eq("user_id", session.user.id)
+        .neq("id", newSelectedBankId);
+
+      if (error) {
+        console.error("Error deselecting other word banks:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update word banks. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error: selectError } = await supabase
+        .from("word_banks")
+        .update({ is_selected: true })
+        .eq("id", newSelectedBankId)
+        .eq("user_id", session.user.id);
+
+      if (selectError) {
+        console.error("Error selecting new word bank:", selectError);
+        toast({
+          title: "Error",
+          description: "Failed to select new word bank. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -210,7 +253,7 @@ export function WordBanksSection() {
           <Label htmlFor="word-bank-select">Select Word Bank</Label>
           <Select
             value={currentWordBank?.toString()}
-            onValueChange={(value) => setCurrentWordBank(Number(value))}
+            onValueChange={handleWordBankSelection}
           >
             <SelectTrigger id="word-bank-select">
               <SelectValue placeholder="Choose a word bank" />
@@ -241,11 +284,7 @@ export function WordBanksSection() {
           >
             Generate with AI
           </Button>
-          <Button
-            size="sm"
-            onClick={() => setIsManageModalOpen(true)}
-            className="flex-1"
-          >
+          <Button size="sm" onClick={() => setIsManageModalOpen(true)} className="flex-1">
             Manage Banks
           </Button>
         </div>
