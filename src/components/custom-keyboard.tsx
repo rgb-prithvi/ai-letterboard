@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import KeyboardBase from "./keyboard-base";
+import useLetterboardStore from "@/store/useLetterboardStore";
 
-const CustomKeyboard: React.FC = () => {
-  const [isLetterBoard, setIsLetterBoard] = useState(true);
+interface CustomKeyboardProps {
+  isLetterBoard: boolean;
+}
+
+const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard }) => {
+  const { appendLetter, toggleBoard } = useLetterboardStore();
 
   const alphaKeys = [
     ["A", "B", "C", "D", "E"],
@@ -24,21 +29,25 @@ const CustomKeyboard: React.FC = () => {
     ["(", ")", "."],
   ];
 
-  const renderKeys = ({ handleKeyPress }) => {
+  const renderKeys = () => {
     const keys = isLetterBoard ? alphaKeys : numericKeys;
-    return keys.map((row, rowIndex) => (
-      <div key={rowIndex} className="flex justify-between mb-2 flex-1">
-        {row.map((key) => (
-          <button
-            key={key}
-            onClick={() => handleKeyPress(key)}
-            className="flex-1 mx-0.5 text-lg bg-white rounded-lg shadow flex items-center justify-center"
-          >
-            {key}
-          </button>
+    return (
+      <div className="flex flex-col h-full">
+        {keys.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex justify-between mb-2 flex-1">
+            {row.map((key) => (
+              <button
+                key={key}
+                onClick={() => appendLetter(key)}
+                className="flex-1 mx-0.5 text-lg bg-white rounded-lg shadow flex items-center justify-center h-full"
+              >
+                {key}
+              </button>
+            ))}
+          </div>
         ))}
       </div>
-    ));
+    );
   };
 
   const handleSubmit = (text: string) => {
@@ -46,16 +55,12 @@ const CustomKeyboard: React.FC = () => {
     // Add your submit logic here
   };
 
-  const handleToggleBoard = () => {
-    setIsLetterBoard((prev) => !prev);
-  };
-
   return (
     <KeyboardBase 
       renderKeys={renderKeys} 
       onSubmit={handleSubmit} 
       isLetterBoard={isLetterBoard}
-      onToggleBoard={handleToggleBoard}
+      onToggleBoard={toggleBoard}
     />
   );
 };

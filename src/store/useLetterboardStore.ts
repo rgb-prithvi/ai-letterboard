@@ -18,6 +18,10 @@ interface LetterboardStore {
   addWordSet: (name: string, customWords: string[]) => void
   setCurrentWordSet: (name: string) => void
   generatePredictions: () => void
+  selectedWords: string[]
+  setSelectedWords: (words: string[]) => void
+  isLetterBoard: boolean
+  toggleBoard: () => void
 }
 
 const commonWordList = commonWords.map((word: { word: string }) => word.word)
@@ -27,6 +31,8 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   predictions: [],
   wordSets: { default: commonWordList },
   currentWordSet: 'default',
+  selectedWords: [],
+  isLetterBoard: true,
   appendLetter: (letter) => set((state) => {
     const newText = state.text + letter
     setTimeout(() => get().generatePredictions(), 0)
@@ -68,6 +74,8 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
 
     set({ predictions })
   },
+  setSelectedWords: (words) => set({ selectedWords: words }),
+  toggleBoard: () => set((state) => ({ isLetterBoard: !state.isLetterBoard })),
 }))
 
 export default useLetterboardStore

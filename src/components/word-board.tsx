@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import KeyboardBase from "./keyboard-base";
-import { Word } from "@/lib/types";
-import { selectWords } from "@/lib/word-selection";
 import { RotateCcw } from "lucide-react";
 import { fetchAndGenerateWordBoard } from "@/lib/word-selection";
+import useLetterboardStore from "@/store/useLetterboardStore";
+import { useToast } from "@/components/ui/use-toast";
 
 const WordBoard: React.FC = () => {
-  const [selectedWords, setSelectedWords] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { selectedWords, setSelectedWords, appendLetter } = useLetterboardStore();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const { toast } = useToast();
 
   const refreshWords = async () => {
     setIsLoading(true);
@@ -24,7 +25,11 @@ const WordBoard: React.FC = () => {
       setSelectedWords(words);
     } catch (error) {
       console.error("Error fetching words:", error);
-      setError("Failed to fetch words. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to fetch words. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -35,11 +40,10 @@ const WordBoard: React.FC = () => {
   }, []);
 
   const onWordSelect = (word: string) => {
-    // Implement word selection logic here if needed
-    console.log(`Selected word: ${word}`);
+    appendLetter(word + " ");
   };
 
-  const renderKeys = ({ handleKeyPress }) => {
+  const renderKeys = () => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-full">
@@ -69,10 +73,7 @@ const WordBoard: React.FC = () => {
         {selectedWords.map((word, index) => (
           <button
             key={index}
-            onClick={() => {
-              handleKeyPress(word + " ");
-              onWordSelect(word);
-            }}
+            onClick={() => onWordSelect(word)}
             className="text-sm bg-white rounded-lg shadow flex items-center justify-center"
           >
             {word}
