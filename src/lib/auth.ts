@@ -1,7 +1,9 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import { supabase } from "@/lib/supabase";
+
+const SALT_ROUNDS = 12;
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -49,12 +51,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.id = token.uid;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.uid = user.id;
+      }
+      return token;
+    },
   },
 };
