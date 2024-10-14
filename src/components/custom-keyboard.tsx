@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const CustomKeyboard = () => {
   const [inputText, setInputText] = useState("");
@@ -24,8 +25,8 @@ const CustomKeyboard = () => {
     ["F", "G", "H", "I", "J"],
     ["K", "L", "M", "N", "O"],
     ["P", "Q", "R", "S", "T"],
-    ["U", "V", "W", "X", "Y", "Z"],
-    ["!", "@", "#", "%", "&", "?"],
+    ["U", "V", "W", "X", "Y"],
+    ["Z", "!", "#", "&", "?"],
   ];
 
   const handleKeyPress = (key) => {
@@ -43,11 +44,10 @@ const CustomKeyboard = () => {
   return (
     <div className="flex flex-col h-full bg-gray-100">
       <div className="flex-1 p-4 min-h-[20%] max-h-[40%] overflow-auto">
-        <input
-          type="text"
+        <Textarea
           value={inputText}
           readOnly
-          className="w-full p-2 text-lg border border-gray-300 rounded"
+          className="w-full h-full p-2 text-lg border border-gray-300 rounded"
         />
       </div>
       <div className={`flex flex-col bg-gray-200 p-2 ${isLandscape ? "h-[80%]" : "h-[60%]"}`}>
