@@ -4,7 +4,7 @@ export type InteractionType = "word_spoken" | "key_press" | "text_submit" | "pre
 
 export async function logInteraction(type: InteractionType, content: string, userId: string) {
   try {
-    const { data, error } = await supabase.from("interaction").insert({
+    const { error } = await supabase.from("interaction").insert({
       type,
       content,
       timestamp: new Date().toISOString(),
