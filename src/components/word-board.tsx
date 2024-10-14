@@ -26,24 +26,20 @@ const WordBoard: React.FC<WordBoardProps> = ({ wordBank, topic, onWordSelect }) 
 
   const renderKeys = ({ handleKeyPress }) => {
     return (
-      <div className="flex flex-col flex-grow">
-        {chunk(selectedWords, 3).map((row, rowIndex) => (
-          <div key={rowIndex} className="flex justify-between mb-2 flex-1">
-            {row.map((word) => (
-              <button
-                key={word.text}
-                onClick={() => {
-                  handleKeyPress(word.text + " ");
-                  onWordSelect(word.text);
-                }}
-                className={`flex-1 mx-0.5 text-sm bg-white rounded-lg shadow flex items-center justify-center ${
-                  word.isHighlighted ? "bg-yellow-200" : word.isCommon ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                {word.text}
-              </button>
-            ))}
-          </div>
+      <div className="grid grid-cols-3 gap-2 h-full">
+        {selectedWords.map((word, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              handleKeyPress(word.text + " ");
+              onWordSelect(word.text);
+            }}
+            className={`text-sm bg-white rounded-lg shadow flex items-center justify-center ${
+              word.isHighlighted ? "bg-yellow-200" : word.isCommon ? "bg-gray-100" : "bg-white"
+            }`}
+          >
+            {word.text}
+          </button>
         ))}
       </div>
     );
@@ -66,12 +62,5 @@ const WordBoard: React.FC<WordBoardProps> = ({ wordBank, topic, onWordSelect }) 
     />
   );
 };
-
-// Helper function to chunk the array into rows
-function chunk<T>(array: T[], size: number): T[][] {
-  return Array.from({ length: Math.ceil(array.length / size) }, (_, index) =>
-    array.slice(index * size, index * size + size)
-  );
-}
 
 export default WordBoard;

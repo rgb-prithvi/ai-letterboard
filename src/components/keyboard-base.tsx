@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ReactNode } from "react";
+import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Eraser, Check } from "lucide-react";
 
@@ -10,9 +10,9 @@ interface KeyboardBaseProps {
     handleBackspace: () => void;
     handleClear: () => void;
     handleSubmit: () => void;
-  }) => ReactNode;
+  }) => React.ReactNode;
   onSubmit: (text: string) => void;
-  extraButtons?: ReactNode;
+  extraButtons?: React.ReactNode;
   isLetterBoard: boolean;
   onToggleBoard: () => void;
 }
@@ -44,15 +44,15 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-100">
-      <div className="flex-grow overflow-auto p-4">
+    <div className="flex flex-col h-screen bg-gray-100">
+      <div className="flex-shrink-0 h-[25vh] p-4">
         <Textarea
           value={inputText}
           readOnly
-          className="w-full h-full p-2 text-2xl sm:text-3xl md:text-4xl border border-gray-300 rounded"
+          className="w-full h-full p-2 text-2xl sm:text-3xl md:text-4xl border border-gray-300 rounded resize-none"
         />
       </div>
-      <div className="flex-shrink-0 flex flex-col bg-gray-200 p-2 overflow-hidden">
+      <div className="flex-grow flex flex-col bg-gray-200 p-2">
         <div className="flex-grow overflow-y-auto">
           {renderKeys({ handleKeyPress, handleBackspace, handleClear, handleSubmit })}
         </div>
