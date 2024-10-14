@@ -1,61 +1,67 @@
 import { Word } from "@/lib/types";
 import commonWords from "common-words";
 
-// Convert common words to our Word type and sort by rank
-const COMMON_WORDS: Word[] = commonWords
-  .map((item) => ({
-    text: item.word,
-    topicRelevance: 0,
-    frequency: 1 / parseInt(item.rank), // Convert rank to a frequency-like value
-  }))
-  .sort((a, b) => b.frequency - a.frequency);
+const TOTAL_WORD_COUNT = 30;
+const COMMON_WORD_PROPORTION = 0.3; // 30% common words
 
-export function selectWords(wordBank: Word[], topicName: string, wordCount: number): Word[] {
-  const topicWords = wordBank.filter((word) => word.topicRelevance > 0);
-  const generalWords = wordBank.filter((word) => word.topicRelevance === 0);
+interface CommonWord {
+  word: string;
+  rank: number;
+}
 
-  // Sort topic words by a combination of relevance and frequency
-  const sortedTopicWords = topicWords.sort(
-    (a, b) => b.topicRelevance * 2 + b.frequency - (a.topicRelevance * 2 + a.frequency),
+export function selectWords(wordBank: Word[] | undefined, topic: string): Word[] {
+  const selectedWords: Word[] = [];
+  const commonWordCount = Math.round(TOTAL_WORD_COUNT * COMMON_WORD_PROPORTION);
+  const wordBankCount = TOTAL_WORD_COUNT - commonWordCount;
+
+  // Step 1: Add words from the word bank
+  if (wordBank && wordBank.length > 0) {
+    const sortedWordBank = wordBank.sort((a, b) => {
+      if (a.isHighlighted && !b.isHighlighted) return -1;
+      if (!a.isHighlighted && b.isHighlighted) return 1;
+      return 0; // Maintain original order if both are highlighted or not highlighted
+    });
+
+    const selectedBankWords = sortedWordBank.slice(0, wordBankCount);
+    selectedWords.push(...selectedBankWords);
+  }
+
+  // Step 2: Add common words
+  const availableCommonWords = commonWords.filter(
+    (cw: CommonWord) =>
+      !selectedWords.some((sw) => sw.text.toLowerCase() === cw.word.toLowerCase()),
   );
 
-  // Sort general words by frequency
-  const sortedGeneralWords = generalWords.sort((a, b) => b.frequency - a.frequency);
+  const selectedCommonWords = availableCommonWords
+    .slice(0, TOTAL_WORD_COUNT - selectedWords.length)
+    .map((cw: CommonWord) => ({
+      text: cw.word,
+      isCommon: true,
+      rank: cw.rank,
+    }));
 
-  const selectedWords: Word[] = [];
-  const commonWordCount = Math.floor(wordCount * 0.3); // 30% of words are common
+  selectedWords.push(...selectedCommonWords);
 
-  // Add common words
-  for (let i = 0; i < commonWordCount && i < COMMON_WORDS.length; i++) {
-    selectedWords.push(COMMON_WORDS[i]);
+  // Step 3: If we still have space and words in the bank, add more words from the word bank
+  if (selectedWords.length < TOTAL_WORD_COUNT && wordBank && wordBank.length > 0) {
+    const remainingBankWords = wordBank.slice(wordBankCount)
+      .filter((w) => !selectedWords.some((sw) => sw.text.toLowerCase() === w.text.toLowerCase()));
+
+    const additionalBankWords = remainingBankWords.slice(
+      0,
+      TOTAL_WORD_COUNT - selectedWords.length,
+    );
+    selectedWords.push(...additionalBankWords);
   }
 
-  // Calculate remaining slots for topic and general words
-  const remainingSlots = wordCount - selectedWords.length;
-  const topicWordCount = Math.min(Math.ceil(remainingSlots * 0.7), sortedTopicWords.length);
-  const generalWordCount = remainingSlots - topicWordCount;
+  // Shuffle the selected words to mix common words and word bank words
+  return shuffleArray(selectedWords);
+}
 
-  // Add topic words
-  for (let i = 0; i < topicWordCount; i++) {
-    if (!selectedWords.some((word) => word.text === sortedTopicWords[i].text)) {
-      selectedWords.push(sortedTopicWords[i]);
-    }
+function shuffleArray<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
-
-  // Add general words
-  for (let i = 0; i < generalWordCount; i++) {
-    if (!selectedWords.some((word) => word.text === sortedGeneralWords[i].text)) {
-      selectedWords.push(sortedGeneralWords[i]);
-    }
-  }
-
-  // If we still have empty slots, fill them with common words
-  while (selectedWords.length < wordCount && selectedWords.length < COMMON_WORDS.length) {
-    const nextCommonWord = COMMON_WORDS[selectedWords.length];
-    if (!selectedWords.some((word) => word.text === nextCommonWord.text)) {
-      selectedWords.push(nextCommonWord);
-    }
-  }
-
-  return selectedWords;
+  return array;
 }

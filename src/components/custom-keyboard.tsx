@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import KeyboardBase from "./keyboard-base";
 
 const CustomKeyboard: React.FC = () => {
-  const [isNumeric, setIsNumeric] = useState(false);
+  const [isLetterBoard, setIsLetterBoard] = useState(true);
 
   const alphaKeys = [
     ["A", "B", "C", "D", "E"],
@@ -24,8 +24,8 @@ const CustomKeyboard: React.FC = () => {
     ["(", ")", "."],
   ];
 
-  const renderKeys = () => {
-    const keys = isNumeric ? numericKeys : alphaKeys;
+  const renderKeys = ({ handleKeyPress }) => {
+    const keys = isLetterBoard ? alphaKeys : numericKeys;
     return keys.map((row, rowIndex) => (
       <div key={rowIndex} className="flex justify-between mb-2 flex-1">
         {row.map((key) => (
@@ -41,33 +41,23 @@ const CustomKeyboard: React.FC = () => {
     ));
   };
 
-  const handleKeyPress = (key: string) => {
-    // This function will be called by KeyboardBase
-  };
-
   const handleSubmit = (text: string) => {
     console.log(text);
     // Add your submit logic here
   };
 
-  const extraButtons = (
-    <>
-      <button
-        onClick={() => setIsNumeric((prev) => !prev)}
-        className="flex-1 mx-0.5 text-sm bg-white rounded-lg shadow flex items-center justify-center"
-      >
-        {isNumeric ? "ABC" : "123"}
-      </button>
-      <button
-        onClick={() => handleKeyPress(" ")}
-        className="flex-grow-[3] mx-0.5 text-sm bg-white rounded-lg shadow flex items-center justify-center"
-      >
-        Space
-      </button>
-    </>
-  );
+  const handleToggleBoard = () => {
+    setIsLetterBoard((prev) => !prev);
+  };
 
-  return <KeyboardBase renderKeys={renderKeys} onSubmit={handleSubmit} extraButtons={extraButtons} />;
+  return (
+    <KeyboardBase 
+      renderKeys={renderKeys} 
+      onSubmit={handleSubmit} 
+      isLetterBoard={isLetterBoard}
+      onToggleBoard={handleToggleBoard}
+    />
+  );
 };
 
 export default CustomKeyboard;
