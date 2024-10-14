@@ -64,13 +64,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
       </div>
       <div className="flex flex-col flex-grow bg-gray-200 p-2">
         <div className="flex-grow overflow-y-auto">{renderKeys()}</div>
-        <div className="mt-2 space-y-2">
-          <button
-            onClick={() => appendLetter(" ")}
-            className="w-full h-10 text-sm bg-white rounded-lg shadow flex items-center justify-center"
-          >
-            Space
-          </button>
+        <div className="mt-2 space-y-2 h-40">
           <div className="flex gap-2">
             <button
               onClick={backspace}
@@ -100,6 +94,12 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
               <Check size={18} />
             </button>
           </div>
+          <button
+            onClick={() => appendLetter(" ")}
+            className="w-full h-10 text-sm bg-white rounded-lg shadow flex items-center justify-center"
+          >
+            Space
+          </button>
         </div>
       </div>
     </div>
