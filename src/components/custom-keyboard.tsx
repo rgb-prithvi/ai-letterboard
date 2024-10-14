@@ -3,12 +3,14 @@
 import React from "react";
 import KeyboardBase from "./keyboard-base";
 import useLetterboardStore from "@/store/useLetterboardStore";
+import { UserSettings } from "@/lib/types";
 
 interface CustomKeyboardProps {
   isLetterBoard: boolean;
+  userSettings: UserSettings;
 }
 
-const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard }) => {
+const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSettings }) => {
   const { appendLetter, toggleBoard } = useLetterboardStore();
 
   const alphaKeys = [
@@ -38,10 +40,15 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard }) => {
             {row.map((key) => (
               <button
                 key={key}
-                onClick={() => appendLetter(key)}
-                className="flex-1 mx-0.5 text-lg bg-white rounded-lg shadow flex items-center justify-center h-full"
+                onClick={() => appendLetter(userSettings.letterCase === "uppercase" ? key.toUpperCase() : key.toLowerCase())}
+                className="flex-1 mx-0.5 rounded-lg shadow flex items-center justify-center h-full"
+                style={{
+                  backgroundColor: userSettings.buttonColor,
+                  color: userSettings.textColor,
+                  fontSize: `${userSettings.fontSize}px`,
+                }}
               >
-                {key}
+                {userSettings.letterCase === "uppercase" ? key.toUpperCase() : key.toLowerCase()}
               </button>
             ))}
           </div>
@@ -61,6 +68,7 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard }) => {
       onSubmit={handleSubmit} 
       isLetterBoard={isLetterBoard}
       onToggleBoard={toggleBoard}
+      userSettings={userSettings}
     />
   );
 };

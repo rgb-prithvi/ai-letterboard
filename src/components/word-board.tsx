@@ -6,8 +6,13 @@ import { RotateCcw } from "lucide-react";
 import { fetchAndGenerateWordBoard } from "@/lib/word-selection";
 import useLetterboardStore from "@/store/useLetterboardStore";
 import { useToast } from "@/components/ui/use-toast";
+import { UserSettings } from "@/lib/types";
 
-const WordBoard: React.FC = () => {
+interface WordBoardProps {
+  userSettings: UserSettings;
+}
+
+const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
   const { selectedWords, setSelectedWords, appendLetter } = useLetterboardStore();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -74,9 +79,14 @@ const WordBoard: React.FC = () => {
           <button
             key={index}
             onClick={() => onWordSelect(word)}
-            className="text-sm bg-white rounded-lg shadow flex items-center justify-center"
+            className="rounded-lg shadow flex items-center justify-center"
+            style={{
+              backgroundColor: userSettings.buttonColor,
+              color: userSettings.textColor,
+              fontSize: `${userSettings.fontSize}px`,
+            }}
           >
-            {word}
+            {userSettings.letterCase === "uppercase" ? word.toUpperCase() : word.toLowerCase()}
           </button>
         ))}
       </div>
@@ -90,7 +100,11 @@ const WordBoard: React.FC = () => {
       extraButtons={
         <button
           onClick={refreshWords}
-          className="flex-1 h-12 text-sm bg-white rounded-lg shadow flex items-center justify-center"
+          className="flex-1 h-12 rounded-lg shadow flex items-center justify-center"
+          style={{
+            backgroundColor: userSettings.buttonColor,
+            color: userSettings.textColor,
+          }}
           disabled={isLoading}
         >
           <RotateCcw size={20} />
@@ -98,6 +112,7 @@ const WordBoard: React.FC = () => {
       }
       isLetterBoard={false}
       onToggleBoard={() => {}}
+      userSettings={userSettings}
     />
   );
 };

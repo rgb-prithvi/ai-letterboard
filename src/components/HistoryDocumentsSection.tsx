@@ -46,7 +46,7 @@ export function HistoryDocumentsSection() {
         `,
         )
         .eq("user_id", userId)
-        .eq("type", "message_completion")
+        .eq("type", "text_submit")
         .order("timestamp", { ascending: false });
 
       if (error) throw error;
@@ -119,11 +119,11 @@ export function HistoryDocumentsSection() {
               </div>
             ))}
           </CardContent>
-          <CardFooter>
+          {/* <CardFooter>
             <Button variant="outline" onClick={handleDownloadAll}>
               Export All
             </Button>
-          </CardFooter>
+          </CardFooter> */}
           <DownloadModal
             isOpen={isDownloadModalOpen}
             onClose={() => setIsDownloadModalOpen(false)}

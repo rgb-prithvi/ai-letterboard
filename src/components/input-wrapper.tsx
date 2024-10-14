@@ -13,7 +13,11 @@ interface InputWrapperProps {
 const InputWrapper: React.FC<InputWrapperProps> = ({ userSettings }) => {
   const isLetterBoard = useLetterboardStore((state) => state.isLetterBoard);
 
-  return userSettings.inputMode === "word" ? <WordBoard /> : <CustomKeyboard isLetterBoard={isLetterBoard} />;
+  return userSettings.inputMode === "word" ? (
+    <WordBoard userSettings={userSettings} />
+  ) : (
+    <CustomKeyboard isLetterBoard={isLetterBoard} userSettings={userSettings} />
+  );
 };
 
 export default InputWrapper;
