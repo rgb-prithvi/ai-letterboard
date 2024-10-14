@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import commonWords from 'common-words'
+import { fetchWordSet } from '@/lib/word-selection'
 
 interface WordSets {
   [key: string]: string[];
@@ -22,14 +22,13 @@ interface LetterboardStore {
   setSelectedWords: (words: string[]) => void
   isLetterBoard: boolean
   toggleBoard: () => void
+  initializeWordSet: () => Promise<void>
 }
-
-const commonWordList = commonWords.map((word: { word: string }) => word.word)
 
 const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   text: '',
   predictions: [],
-  wordSets: { default: commonWordList },
+  wordSets: { default: [] },
   currentWordSet: 'default',
   selectedWords: [],
   isLetterBoard: true,
@@ -53,7 +52,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   }),
   setText: (newText) => set({ text: newText }),
   addWordSet: (name, customWords) => set((state) => {
-    const newWordSet = Array.from(new Set([...customWords, ...commonWordList]))
+    const newWordSet = Array.from(new Set([...customWords, ...state.wordSets.default]))
     return { 
       wordSets: { ...state.wordSets, [name]: newWordSet },
       currentWordSet: name
@@ -65,7 +64,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     const words = text.split(' ')
     const currentWord = words[words.length - 1].toLowerCase()
 
-    const currentSetWords = wordSets[currentWordSet] || wordSets.default
+    const currentSetWords = wordSets[currentWordSet] || []
 
     const predictions = currentSetWords
       .filter(word => word.toLowerCase().startsWith(currentWord))
@@ -76,6 +75,11 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   },
   setSelectedWords: (words) => set({ selectedWords: words }),
   toggleBoard: () => set((state) => ({ isLetterBoard: !state.isLetterBoard })),
+  initializeWordSet: async () => {
+    const words = await fetchWordSet()
+    set({ wordSets: { default: words } })
+    get().generatePredictions()
+  },
 }))
 
 export default useLetterboardStore

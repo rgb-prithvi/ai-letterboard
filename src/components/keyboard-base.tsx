@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Eraser, Check } from "lucide-react";
 import useLetterboardStore from "@/store/useLetterboardStore";
@@ -20,7 +20,20 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   isLetterBoard,
   onToggleBoard,
 }) => {
-  const { text, appendLetter, backspace, clear, setText } = useLetterboardStore();
+  const {
+    text,
+    appendLetter,
+    backspace,
+    clear,
+    setText,
+    predictions,
+    selectPrediction,
+    initializeWordSet,
+  } = useLetterboardStore();
+
+  useEffect(() => {
+    initializeWordSet();
+  }, []);
 
   const handleSubmit = () => {
     onSubmit(text);
@@ -35,6 +48,19 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           readOnly
           className="w-full h-full p-2 text-2xl sm:text-3xl md:text-4xl border border-gray-300 rounded resize-none"
         />
+      </div>
+      <div className="flex-shrink-0 p-2 bg-gray-200">
+        <div className="flex justify-center space-x-2">
+          {predictions.map((prediction, index) => (
+            <button
+              key={index}
+              onClick={() => selectPrediction(prediction)}
+              className="px-3 py-1 text-sm bg-white rounded-lg shadow"
+            >
+              {prediction}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="flex flex-col flex-grow bg-gray-200 p-2">
         <div className="flex-grow overflow-y-auto">{renderKeys()}</div>
