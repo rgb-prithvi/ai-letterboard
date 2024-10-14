@@ -29,15 +29,19 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     predictions,
     selectPrediction,
     initializeWordSet,
+    playAudio,
   } = useLetterboardStore();
 
   useEffect(() => {
     initializeWordSet();
   }, []);
 
-  const handleSubmit = () => {
-    onSubmit(text);
-    setText("");
+  const handleSubmit = async () => {
+    if (text.trim()) {
+      await playAudio(text.trim());
+      onSubmit(text);
+      setText("");
+    }
   };
 
   return (
