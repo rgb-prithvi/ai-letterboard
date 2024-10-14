@@ -1,67 +1,77 @@
-import { Word } from "@/lib/types";
 import commonWords from "common-words";
+import { supabase } from "./supabase";
 
-const TOTAL_WORD_COUNT = 30;
-const COMMON_WORD_PROPORTION = 0.3; // 30% common words
-
-interface CommonWord {
+type Word = {
   word: string;
-  rank: number;
-}
+  is_highlighted: boolean;
+};
 
-export function selectWords(wordBank: Word[] | undefined, topic: string): Word[] {
-  const selectedWords: Word[] = [];
-  const commonWordCount = Math.round(TOTAL_WORD_COUNT * COMMON_WORD_PROPORTION);
-  const wordBankCount = TOTAL_WORD_COUNT - commonWordCount;
+type CommonWord = {
+  rank: string;
+  word: string;
+};
 
-  // Step 1: Add words from the word bank
-  if (wordBank && wordBank.length > 0) {
-    const sortedWordBank = wordBank.sort((a, b) => {
-      if (a.isHighlighted && !b.isHighlighted) return -1;
-      if (!a.isHighlighted && b.isHighlighted) return 1;
-      return 0; // Maintain original order if both are highlighted or not highlighted
-    });
+function generateWordBoard(
+  wordBank: Word[],
+  limit: number = 30,
+  numCommonWords: number = 8,
+): string[] {
+  const highlightedWords = wordBank.filter((w) => w.is_highlighted);
+  const nonHighlightedWords = wordBank.filter((w) => !w.is_highlighted);
 
-    const selectedBankWords = sortedWordBank.slice(0, wordBankCount);
-    selectedWords.push(...selectedBankWords);
-  }
+  // Prioritize highlighted words
+  let selectedWords: string[] = highlightedWords.slice(0, limit).map((w) => w.word);
 
-  // Step 2: Add common words
-  const availableCommonWords = commonWords.filter(
-    (cw: CommonWord) =>
-      !selectedWords.some((sw) => sw.text.toLowerCase() === cw.word.toLowerCase()),
-  );
-
-  const selectedCommonWords = availableCommonWords
-    .slice(0, TOTAL_WORD_COUNT - selectedWords.length)
-    .map((cw: CommonWord) => ({
-      text: cw.word,
-      isCommon: true,
-      rank: cw.rank,
-    }));
-
-  selectedWords.push(...selectedCommonWords);
-
-  // Step 3: If we still have space and words in the bank, add more words from the word bank
-  if (selectedWords.length < TOTAL_WORD_COUNT && wordBank && wordBank.length > 0) {
-    const remainingBankWords = wordBank.slice(wordBankCount)
-      .filter((w) => !selectedWords.some((sw) => sw.text.toLowerCase() === w.text.toLowerCase()));
-
-    const additionalBankWords = remainingBankWords.slice(
-      0,
-      TOTAL_WORD_COUNT - selectedWords.length,
+  // Add non-highlighted words if there's space left
+  if (selectedWords.length < limit - numCommonWords) {
+    const remainingSlots = limit - numCommonWords - selectedWords.length;
+    selectedWords = selectedWords.concat(
+      nonHighlightedWords.slice(0, remainingSlots).map((w) => w.word),
     );
-    selectedWords.push(...additionalBankWords);
   }
 
-  // Shuffle the selected words to mix common words and word bank words
-  return shuffleArray(selectedWords);
+  // Ensure at least 8 words from commonWords
+  const commonWordsList = (commonWords as CommonWord[])
+    .sort((a, b) => parseInt(a.rank) - parseInt(b.rank))
+    .map((cw) => cw.word);
+  selectedWords = selectedWords.concat(commonWordsList.slice(0, numCommonWords));
+
+  // Fill the remaining slots with common words if needed
+  if (selectedWords.length < limit) {
+    const remainingSlots = limit - selectedWords.length;
+    selectedWords = selectedWords.concat(
+      commonWordsList.slice(numCommonWords, numCommonWords + remainingSlots),
+    );
+  }
+
+  return selectedWords.slice(0, limit);
 }
 
-function shuffleArray<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+export async function fetchAndGenerateWordBoard(
+  limit: number = 30,
+  numCommonWords: number = 8,
+): Promise<string[]> {
+  const { data: bankWords, error } = await supabase
+    .from("word_banks")
+    .select(
+      `
+      id,
+      words (
+        id,
+        word,
+        is_highlighted
+      )
+    `,
+    )
+    .eq("is_selected", true)
+    .single();
+
+  if (error) {
+    console.error("Error fetching word bank:", error);
+    return [];
   }
-  return array;
+
+  const wordBank: Word[] = bankWords.words;
+
+  return generateWordBoard(wordBank, limit, numCommonWords);
 }

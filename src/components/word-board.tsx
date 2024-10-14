@@ -5,12 +5,29 @@ import KeyboardBase from "./keyboard-base";
 import { Word } from "@/lib/types";
 import { selectWords } from "@/lib/word-selection";
 import { RotateCcw } from "lucide-react";
+import { fetchAndGenerateWordBoard } from "@/lib/word-selection";
 
 const WordBoard: React.FC = () => {
-  const [selectedWords, setSelectedWords] = useState<Word[]>([]);
+  const [selectedWords, setSelectedWords] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const refreshWords = () => {
-    setSelectedWords(selectWords());
+  const refreshWords = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const words = await fetchAndGenerateWordBoard();
+      console.log("Fetched words:", words);
+      if (words.length === 0) {
+        setError("No words found. Please make sure you have a selected word bank with words.");
+      }
+      setSelectedWords(words);
+    } catch (error) {
+      console.error("Error fetching words:", error);
+      setError("Failed to fetch words. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -23,20 +40,42 @@ const WordBoard: React.FC = () => {
   };
 
   const renderKeys = ({ handleKeyPress }) => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <p>Loading words...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-red-500">{error}</p>
+        </div>
+      );
+    }
+
+    if (selectedWords.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <p>No words available. Please refresh or check your word bank.</p>
+        </div>
+      );
+    }
+
     return (
       <div className="grid grid-cols-3 gap-2 h-full">
         {selectedWords.map((word, index) => (
           <button
             key={index}
             onClick={() => {
-              handleKeyPress(word.text + " ");
-              onWordSelect(word.text);
+              handleKeyPress(word + " ");
+              onWordSelect(word);
             }}
-            className={`text-sm bg-white rounded-lg shadow flex items-center justify-center ${
-              word.isHighlighted ? "bg-yellow-200" : word.isCommon ? "bg-gray-100" : "bg-white"
-            }`}
+            className="text-sm bg-white rounded-lg shadow flex items-center justify-center"
           >
-            {word.text}
+            {word}
           </button>
         ))}
       </div>
@@ -51,6 +90,7 @@ const WordBoard: React.FC = () => {
         <button
           onClick={refreshWords}
           className="flex-1 h-12 text-sm bg-white rounded-lg shadow flex items-center justify-center"
+          disabled={isLoading}
         >
           <RotateCcw size={20} />
         </button>
