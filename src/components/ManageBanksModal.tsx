@@ -71,11 +71,11 @@ export function ManageBanksModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="w-full max-w-3xl">
         <DialogHeader>
           <DialogTitle>Manage Word Banks</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+        <div className="space-y-4">
           {wordBanks.map((bank) => (
             <div key={bank.id} className="flex items-center justify-between p-2 border rounded">
               <span>{bank.name}</span>

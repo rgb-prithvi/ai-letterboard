@@ -200,7 +200,7 @@ export function WordBanksSection() {
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Word Banks</CardTitle>
         <CardDescription>Manage your word banks for autocomplete</CardDescription>
@@ -224,14 +224,30 @@ export function WordBanksSection() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}>
-            Create New Bank
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex-1 mr-2"
+          >
+            Create New
           </Button>
-          <Button variant="outline" onClick={() => setIsGenerateModalOpen(true)}>
-            Generate Bank with AI
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsGenerateModalOpen(true)}
+            className="flex-1 mr-2"
+          >
+            Generate with AI
           </Button>
-          <Button onClick={() => setIsManageModalOpen(true)}>Manage Banks</Button>
+          <Button
+            size="sm"
+            onClick={() => setIsManageModalOpen(true)}
+            className="flex-1"
+          >
+            Manage Banks
+          </Button>
         </div>
       </CardContent>
       <CreateBankModal

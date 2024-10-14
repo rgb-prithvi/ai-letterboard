@@ -23,17 +23,34 @@ export function GenerateBankModal({ isOpen, onClose, onCreateBank }: GenerateBan
   const [words, setWords] = useState<Word[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"input" | "review">("input");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
-    // TODO: Implement AI generation logic here
-    // For now, we'll use placeholder data
-    const generatedWords: Word[] = Array.from({ length: wordCount }, (_, i) => ({
-      word: `Word ${i + 1}`,
-      is_highlighted: false,
-    }));
-    setWords(generatedWords);
-    setStep("review");
+    setIsGenerating(true);
     setError(null);
+
+    try {
+      const response = await fetch("/api/generate-words", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, description, wordCount }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate words");
+      }
+
+      const data = await response.json();
+      setWords(data.words);
+      setStep("review");
+    } catch (error) {
+      console.error("Error generating words:", error);
+      setError("Failed to generate words. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleCreate = () => {
@@ -87,12 +104,12 @@ export function GenerateBankModal({ isOpen, onClose, onCreateBank }: GenerateBan
               />
             </div>
             <div>
-              <Label htmlFor="bank-description">Description (optional)</Label>
+              <Label htmlFor="bank-description">Description</Label>
               <Textarea
                 id="bank-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter a description for the AI to use"
+                placeholder="Enter a description for the word bank"
                 rows={3}
               />
             </div>
@@ -105,9 +122,12 @@ export function GenerateBankModal({ isOpen, onClose, onCreateBank }: GenerateBan
                 step={1}
                 value={[wordCount]}
                 onValueChange={(value) => setWordCount(value[0])}
+                className="mt-4"
               />
             </div>
-            <Button onClick={handleGenerate}>Generate Words</Button>
+            <Button onClick={handleGenerate} disabled={isGenerating}>
+              {isGenerating ? "Generating..." : "Generate Words"}
+            </Button>
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
