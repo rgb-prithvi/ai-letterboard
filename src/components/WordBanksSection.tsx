@@ -70,9 +70,10 @@ export function WordBanksSection() {
       }));
 
       setWordBanks(wordBanksWithWords);
-      
+
       // Find the selected word bank or default to the first one
-      const selectedBank = wordBanksWithWords.find(bank => bank.is_selected) || wordBanksWithWords[0];
+      const selectedBank =
+        wordBanksWithWords.find((bank) => bank.is_selected) || wordBanksWithWords[0];
       if (selectedBank) {
         setCurrentWordBank(selectedBank.id);
       }
@@ -209,7 +210,7 @@ export function WordBanksSection() {
     setCurrentWordBank(newSelectedBankId);
 
     if (session?.user?.id) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("word_banks")
         .update({ is_selected: false })
         .eq("user_id", session.user.id)
@@ -251,10 +252,7 @@ export function WordBanksSection() {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="word-bank-select">Select Word Bank</Label>
-          <Select
-            value={currentWordBank?.toString()}
-            onValueChange={handleWordBankSelection}
-          >
+          <Select value={currentWordBank?.toString()} onValueChange={handleWordBankSelection}>
             <SelectTrigger id="word-bank-select">
               <SelectValue placeholder="Choose a word bank" />
             </SelectTrigger>

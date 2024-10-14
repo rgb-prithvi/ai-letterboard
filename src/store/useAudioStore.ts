@@ -27,6 +27,7 @@ const useAudioStore = create<AudioStore>((set, get) => ({
   audioTimeout: null,
 
   initializeAudio: () => {
+    // @ts-ignore
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     set({ audioContext });
   },

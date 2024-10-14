@@ -10,7 +10,6 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Copy, Download } from "lucide-react";
-import { jsPDF } from "jspdf";
 import { useToast } from "@/components/ui/use-toast";
 import { DownloadModal } from "@/components/DownloadModal";
 import { supabase } from "@/lib/supabase";
@@ -38,12 +37,14 @@ export function HistoryDocumentsSection() {
     try {
       const { data, error } = await supabase
         .from("interaction")
-        .select(`
+        .select(
+          `
           interaction_id,
           content,
           timestamp,
           user_id
-        `)
+        `,
+        )
         .eq("user_id", userId)
         .eq("type", "message_completion")
         .order("timestamp", { ascending: false });

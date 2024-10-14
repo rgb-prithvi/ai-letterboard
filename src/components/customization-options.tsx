@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Moon, Sun } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -30,18 +29,6 @@ import { UserSettings } from "@/lib/types";
 import { defaultSettings } from "@/lib/constants";
 import { fontOptions } from "@/lib/fonts";
 
-// Add this function at the top of the file, outside of the component
-async function fetchGoogleFonts() {
-  const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY;
-  const response = await fetch(`https://www.googleapis.com/webfonts/v1/webfonts?key=${API_KEY}`);
-  const data = await response.json();
-  return data.items.map((font: any) => ({
-    family: font.family,
-    variants: font.variants,
-    files: font.files,
-  }));
-}
-
 export function CustomizationOptions() {
   const [userSettings, setUserSettings] = useState<UserSettings>({
     theme: "light",
@@ -67,7 +54,7 @@ export function CustomizationOptions() {
   const fetchUserSettings = async () => {
     const session = await getSession();
     if (session && session.user) {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("app_user")
         .select("settings")
         .eq("user_id", session.user.id)
