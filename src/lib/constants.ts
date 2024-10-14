@@ -1,4 +1,4 @@
-import { CommonWord } from "@/lib/word-selection";
+import { CommonWord } from "@/lib/types";
 
 export const defaultSettings = {
   font: "inter",

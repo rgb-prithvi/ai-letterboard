@@ -1,6 +1,6 @@
 export interface UserSettings {
-  theme: "light" | "dark";
-  inputMode: "letter" | "word";
+  theme: string;
+  inputMode: string;
   textToSpeech: boolean;
   autoCompletion: boolean;
   textColor: string;
