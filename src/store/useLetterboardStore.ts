@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { fetchWordSet } from "@/lib/word-selection";
 import { DEFAULT_VOICE_ID } from "@/lib/constants";
+import { logInteraction } from "@/lib/log-interaction";
 
 interface WordSets {
   [key: string]: string[];
@@ -26,6 +27,8 @@ interface LetterboardStore {
   initializeWordSet: () => Promise<void>;
   currentSentence: string;
   playAudio: (text: string) => Promise<void>;
+  userId: string | null;
+  setUserId: (id: string | null) => void;
 }
 
 const useLetterboardStore = create<LetterboardStore>((set, get) => ({
@@ -36,7 +39,12 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   selectedWords: [],
   isLetterBoard: true,
   currentSentence: "",
+  userId: null,
   appendLetter: async (letter: string) => {
+    const { userId } = get();
+    if (userId) {
+      await logInteraction("key_press", letter, userId);
+    }
     set((state) => {
       const newText = state.text + letter;
       const newSentence = state.currentSentence + letter;
@@ -53,6 +61,10 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     }
   },
   backspace: async () => {
+    const { userId } = get();
+    if (userId) {
+      await logInteraction("key_press", "backspace", userId);
+    }
     set((state) => {
       const newText = state.text.slice(0, -1);
       const newSentence = state.currentSentence.slice(0, -1);
@@ -60,15 +72,26 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
       return { text: newText, currentSentence: newSentence };
     });
   },
-  clear: () => set({ text: "" }),
-  selectPrediction: (prediction) =>
+  clear: () => {
+    const { userId } = get();
+    if (userId) {
+      logInteraction("key_press", "clear", userId);
+    }
+    set({ text: "" });
+  },
+  selectPrediction: (prediction) => {
+    const { userId } = get();
+    if (userId) {
+      logInteraction("prediction_selected", prediction, userId);
+    }
     set((state) => {
       const words = state.text.split(" ");
       words[words.length - 1] = prediction;
       const newText = words.join(" ") + " ";
       setTimeout(() => get().generatePredictions(), 0);
       return { text: newText };
-    }),
+    });
+  },
   setText: (newText) => set({ text: newText }),
   addWordSet: (name, customWords) =>
     set((state) => {
@@ -101,6 +124,10 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     get().generatePredictions();
   },
   playAudio: async (text: string) => {
+    const { userId } = get();
+    if (userId) {
+      await logInteraction("word_spoken", text, userId);
+    }
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -133,6 +160,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
 
     await pump();
   },
+  setUserId: (id: string | null) => set({ userId: id }),
 }));
 
 export default useLetterboardStore;

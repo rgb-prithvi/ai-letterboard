@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Eraser, Check } from "lucide-react";
 import useLetterboardStore from "@/store/useLetterboardStore";
+import { logInteraction } from "@/lib/log-interaction";
 
 interface KeyboardBaseProps {
   renderKeys: () => React.ReactNode;
@@ -20,6 +22,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   isLetterBoard,
   onToggleBoard,
 }) => {
+  const { data: session } = useSession();
   const {
     text,
     appendLetter,
@@ -30,15 +33,22 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     selectPrediction,
     initializeWordSet,
     playAudio,
+    setUserId,
   } = useLetterboardStore();
 
   useEffect(() => {
     initializeWordSet();
-  }, []);
+    if (session?.user?.id) {
+      setUserId(session.user.id);
+    }
+  }, [session]);
 
   const handleSubmit = async () => {
     if (text.trim()) {
       await playAudio(text.trim());
+      if (session?.user?.id) {
+        await logInteraction('text_submit', text.trim(), session.user.id);
+      }
       onSubmit(text);
       setText("");
     }
