@@ -181,14 +181,14 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           }}
         />
       </div>
-      <div className="flex-shrink-0 p-2 bg-gray-200">
+      <div className="flex-shrink-0 p-2 h-16 mb-4">
         {userSettings.autoCompletion && (
           <div className="flex justify-center space-x-2 my-1">
             {predictions.map((prediction, index) => (
               <button
                 key={index}
                 onClick={() => selectPrediction(prediction)}
-                className="px-4 py-2 text-sm bg-white rounded-lg shadow"
+                className="px-6 py-3 text-base bg-white rounded-lg shadow"
               >
                 {prediction}
               </button>
