@@ -104,7 +104,7 @@ const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
       extraButtons={
         <button
           onClick={refreshWords}
-          className={`flex-1 h-12 rounded-lg shadow flex items-center justify-center ${fonts[userSettings.font as keyof typeof fonts]?.className || ""}`}
+          className={`flex-1 h-10 rounded-lg shadow flex items-center justify-center ${fonts[userSettings.font as keyof typeof fonts]?.className || ""}`}
           style={{
             backgroundColor: userSettings.buttonColor,
             color: userSettings.textColor,

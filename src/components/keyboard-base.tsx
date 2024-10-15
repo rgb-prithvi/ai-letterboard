@@ -113,15 +113,15 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
 
   return (
     <div className={`flex flex-col h-screen ${fontClass}`} style={keyboardStyle}>
-      <div className="h-[20vh] p-4">
+      <div className="h-36 p-4">
         <Textarea
           value={text}
           readOnly
-          className={`w-full h-full p-2 border border-gray-300 rounded resize-none ${fontClass}`}
-          style={{ fontSize: `${userSettings.fontSize * 1.5}px` }}
+          className={`w-full h-full p-8 border border-gray-300 rounded resize-none ${fontClass}`}
+          style={{ fontSize: `${userSettings.fontSize * 1.2}px` }}
         />
       </div>
-      <div className="h-[80vh]">
+      <div>
         <div className="flex-shrink-0 p-2 bg-gray-200">
           {userSettings.autoCompletion && (
             <div className="flex justify-center space-x-2 my-1">
@@ -141,8 +141,8 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           className="flex flex-col flex-grow p-2 h-full"
           style={{ backgroundColor: userSettings.theme === "light" ? "#e5e7eb" : "#374151" }}
         >
-          <div className="flex-grow overflow-y-auto">{renderKeys()}</div>
-          <div className="mt-2 space-y-2">
+          <div className="flex-grow">{renderKeys()}</div>
+          <div className="mt-2 space-y-2 h-24">
             <div className="flex gap-2">
               <button
                 onClick={backspace}
