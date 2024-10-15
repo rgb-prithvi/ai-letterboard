@@ -29,7 +29,6 @@ interface LetterboardStore {
   toggleBoard: () => void;
   initializeWordSet: () => Promise<void>;
   currentSentence: string;
-  playAudio: (text: string) => Promise<void>;
   userId: string | null;
   setUserId: (id: string | null) => void;
   fetchPredictions: (query: string) => Promise<void>;
@@ -122,53 +121,6 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     set({ wordSets: { default: words } });
     get().generatePredictions();
   },
-  playAudio: async (text: string) => {
-    const { userId } = get();
-    if (userId) {
-      await logInteraction("word_spoken", text, userId);
-    }
-
-    try {
-      const response = await fetch(`/api/tts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, voice_id: DEFAULT_VOICE_ID }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`TTS request failed: ${response.statusText}`);
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // Create a new Audio element
-      const audio = new Audio();
-      
-      // Set up event listeners
-      audio.addEventListener('canplaythrough', () => {
-        audio.play().catch(e => console.error("Playback failed:", e));
-      });
-
-      audio.addEventListener('ended', () => {
-        URL.revokeObjectURL(audioUrl);
-      });
-
-      audio.addEventListener('error', (e) => {
-        console.error("Audio playback error:", e);
-        URL.revokeObjectURL(audioUrl);
-      });
-
-      // Set the source and load the audio
-      audio.src = audioUrl;
-      audio.load();
-
-    } catch (error) {
-      console.error("Error playing audio:", error);
-      // You might want to add some user-facing error handling here
-    }
-  },
-  setUserId: (id: string | null) => set({ userId: id }),
   fetchPredictions: debounce(async (query: string) => {
     const { userId, userWordBankIds, userSettings } = get();
     if (!userId || query.length === 0) {
@@ -217,6 +169,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     }
   },
   setUserSettings: (settings: UserSettings) => set({ userSettings: settings }),
+  setUserId: (id: string | null) => set({ userId: id }),
 }));
 
 export default useLetterboardStore;

@@ -16,6 +16,7 @@ import useLetterboardStore from "@/store/useLetterboardStore";
 import { logInteraction } from "@/lib/log-interaction";
 import { UserSettings } from "@/lib/types";
 import { fonts } from "@/lib/fonts";
+import { playAudio } from "@/lib/audio-utils";
 
 interface KeyboardBaseProps {
   renderKeys: () => React.ReactNode;
@@ -42,9 +43,9 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     predictions,
     selectPrediction,
     initializeWordSet,
-    playAudio,
     setUserId,
     fetchUserWordBankIds,
+    userId,
   } = useLetterboardStore();
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">(
     "idle",
@@ -73,7 +74,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     setSubmitStatus("submitting");
     try {
       if (userSettings.textToSpeech) {
-        await playAudio(text);
+        await playAudio(text, userId);
       }
       if (session?.user?.id) {
         await logInteraction("text_submit", text.trim(), session.user.id);
@@ -162,7 +163,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   const handlePlayAudio = async () => {
     setIsPlayingAudio(true);
     try {
-      await playAudio(text);
+      await playAudio(text, userId);
     } catch (error) {
       console.error("Error playing audio:", error);
     } finally {

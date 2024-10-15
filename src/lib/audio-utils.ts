@@ -1,4 +1,6 @@
-import audioData from './conversation-output.json';
+import audioData from "./conversation-output.json";
+import { DEFAULT_VOICE_ID } from "@/lib/constants";
+import { logInteraction } from "./log-interaction";
 
 const SAMPLE_RATE = 24000; // Matching the sample rate from play-audio.js
 
@@ -34,6 +36,48 @@ export function playAudioBuffer(audioContext: AudioContext, buffer: AudioBuffer)
   source.connect(audioContext.destination);
   source.start();
   return source;
+}
+
+export async function playAudio(text: string, userId: string | null) {
+  if (userId) {
+    await logInteraction("word_spoken", text, userId);
+  }
+
+  try {
+    const response = await fetch(`/api/tts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voice_id: DEFAULT_VOICE_ID }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`TTS request failed: ${response.statusText}`);
+    }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    const audio = new Audio();
+
+    audio.addEventListener("canplaythrough", () => {
+      audio.play().catch((e) => console.error("Playback failed:", e));
+    });
+
+    audio.addEventListener("ended", () => {
+      URL.revokeObjectURL(audioUrl);
+    });
+
+    audio.addEventListener("error", (e) => {
+      console.error("Audio playback error:", e);
+      URL.revokeObjectURL(audioUrl);
+    });
+
+    audio.src = audioUrl;
+    audio.load();
+  } catch (error) {
+    console.error("Error playing audio:", error);
+    // You might want to add some user-facing error handling here
+  }
 }
 
 export function getAudioDataFromJson(): Record<string, number> {
