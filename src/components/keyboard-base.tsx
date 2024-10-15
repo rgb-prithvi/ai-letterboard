@@ -132,7 +132,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
 
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full mb-4">
         {keys.map((row, rowIndex) => (
           <div key={rowIndex} className="flex justify-between mb-2 flex-1">
             {row.map((key) => (
