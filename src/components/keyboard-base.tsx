@@ -17,7 +17,7 @@ import { logInteraction } from "@/lib/log-interaction";
 import { UserSettings } from "@/lib/types";
 import { fonts } from "@/lib/fonts";
 import { playAudio } from "@/lib/audio-utils";
-import { Howler } from 'howler';
+import { Howler } from "howler";
 
 interface KeyboardBaseProps {
   renderKeys: () => React.ReactNode;
@@ -53,7 +53,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   );
   const [isNumericKeys, setIsNumericKeys] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-
+  const [isTouching, setIsTouching] = useState(false);
   const numericKeys = [
     ["1", "2", "3"],
     ["4", "5", "6"],
@@ -161,6 +161,24 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     );
   };
 
+  const handleTouchStart = (e) => {
+    e.preventDefault(); // Prevent default touch behavior
+    setIsTouching(true);
+  };
+
+  const handleTouchEnd = async (e) => {
+    e.preventDefault(); // Prevent default touch behavior
+    if (isTouching) {
+      setIsTouching(false);
+      await handlePlayAudio();
+    }
+  };
+
+  const handleTouchCancel = (e) => {
+    e.preventDefault(); // Prevent default touch behavior
+    setIsTouching(false);
+  };
+
   const handlePlayAudio = async () => {
     setIsPlayingAudio(true);
     try {
@@ -226,6 +244,9 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           </button>
           <button
             onClick={handlePlayAudio}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchCancel}
             className="h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
             disabled={isPlayingAudio || submitStatus === "submitting"}
