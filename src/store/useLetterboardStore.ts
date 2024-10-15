@@ -163,7 +163,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
         .from("words")
         .select("word")
         .in("word_bank_id", userWordBankIds)
-        .ilike("word", `%${query}%`)
+        .ilike("word", `${query}%`)
         .order("word", { ascending: true })
         .limit(5);
 
@@ -175,7 +175,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
       console.error("Error fetching predictions:", error);
       set({ predictions: [] });
     }
-  }, 300),
+  }, 100),
   fetchUserWordBankIds: async () => {
     const { userId } = get();
     if (!userId) return;
