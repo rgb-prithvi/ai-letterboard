@@ -44,6 +44,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     initializeWordSet,
     playAudio,
     setUserId,
+    fetchUserWordBankIds,
   } = useLetterboardStore();
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">(
     "idle",
@@ -64,6 +65,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     initializeWordSet();
     if (session?.user?.id) {
       setUserId(session.user.id);
+      fetchUserWordBankIds();
     }
   }, [session]);
 

@@ -39,6 +39,7 @@ export function WordBanksSection() {
         .eq("user_id", session.user.id);
 
       if (banksError) {
+        console.error("Error fetching word banks:", banksError);
         toast({
           title: "Error",
           description: "Failed to fetch word banks. Please try again.",
@@ -56,6 +57,7 @@ export function WordBanksSection() {
         );
 
       if (wordsError) {
+        console.error("Error fetching words:", wordsError);
         toast({
           title: "Error",
           description: "Failed to fetch words. Please try again.",
@@ -90,6 +92,7 @@ export function WordBanksSection() {
         .single();
 
       if (bankError) {
+        console.error("Error creating word bank:", bankError);
         toast({
           title: "Error",
           description: "Failed to create word bank. Please try again.",
@@ -110,6 +113,7 @@ export function WordBanksSection() {
         .select();
 
       if (wordsError) {
+        console.error("Error adding words to the bank:", wordsError);
         toast({
           title: "Error",
           description: "Failed to add words to the bank. Please try again.",
@@ -136,6 +140,7 @@ export function WordBanksSection() {
       .single();
 
     if (bankError) {
+      console.error("Error updating word bank:", bankError);
       toast({
         title: "Error",
         description: "Failed to update word bank. Please try again.",
@@ -147,6 +152,7 @@ export function WordBanksSection() {
     const { error: deleteError } = await supabase.from("words").delete().eq("word_bank_id", id);
 
     if (deleteError) {
+      console.error("Error deleting words:", deleteError);
       toast({
         title: "Error",
         description: "Failed to update words. Please try again.",
@@ -167,6 +173,7 @@ export function WordBanksSection() {
       .select();
 
     if (insertError) {
+      console.error("Error adding words to the bank:", insertError);
       toast({
         title: "Error",
         description: "Failed to update words. Please try again.",
@@ -187,6 +194,7 @@ export function WordBanksSection() {
     const { error } = await supabase.from("word_banks").delete().eq("id", id);
 
     if (error) {
+      console.error("Error deleting word bank:", error);
       toast({
         title: "Error",
         description: "Failed to delete word bank. Please try again.",

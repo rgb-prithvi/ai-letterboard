@@ -32,6 +32,8 @@ interface LetterboardStore {
   userId: string | null;
   setUserId: (id: string | null) => void;
   fetchPredictions: (query: string) => Promise<void>;
+  userWordBankIds: number[];
+  fetchUserWordBankIds: () => Promise<void>;
 }
 
 const useLetterboardStore = create<LetterboardStore>((set, get) => ({
@@ -43,6 +45,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   isLetterBoard: true,
   currentSentence: "",
   userId: null,
+  userWordBankIds: [],
   appendLetter: async (letter: string) => {
     const { userId } = get();
     if (userId) {
@@ -149,8 +152,8 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   },
   setUserId: (id: string | null) => set({ userId: id }),
   fetchPredictions: debounce(async (query: string) => {
-    const { userId } = get();
-    if (!userId || query.length === 0) {
+    const { userId, userWordBankIds } = get();
+    if (!userId || query.length === 0 || userWordBankIds.length === 0) {
       set({ predictions: [] });
       return;
     }
@@ -159,11 +162,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
       const { data, error } = await supabase
         .from("words")
         .select("word")
-        .in('word_bank_id', (sb) =>
-          sb.from('word_banks')
-            .select('id')
-            .eq('user_id', userId)
-        )
+        .in("word_bank_id", userWordBankIds)
         .ilike("word", `%${query}%`)
         .order("word", { ascending: true })
         .limit(5);
@@ -176,7 +175,22 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
       console.error("Error fetching predictions:", error);
       set({ predictions: [] });
     }
-  }, 300), // 300ms debounce
+  }, 300),
+  fetchUserWordBankIds: async () => {
+    const { userId } = get();
+    if (!userId) return;
+
+    try {
+      const { data, error } = await supabase.from("word_banks").select("id").eq("user_id", userId);
+
+      if (error) throw error;
+
+      const ids = data.map((item) => item.id);
+      set({ userWordBankIds: ids });
+    } catch (error) {
+      console.error("Error fetching user word bank IDs:", error);
+    }
+  },
 }));
 
 export default useLetterboardStore;
