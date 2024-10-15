@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        text,
+        text: `${text.trim()}.`,
         voice_settings: {
           stability: 0.9,
-          similarity_boost: 0.9,
+          similarity_boost: 0.7,
         },
       }),
     });
