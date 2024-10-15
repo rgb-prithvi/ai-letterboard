@@ -107,7 +107,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
 
   return (
     <>
-      <div className="h-[30vh] lg:h-[40vh] p-4">
+      <div className="h-36 lg:h-48 p-4">
         <Textarea
           value={text}
           readOnly
