@@ -223,7 +223,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
             <Eraser size={18} />
           </button>
           <button
-            onClick={handlePlayAudio}
+            onClickCapture={handlePlayAudio}
             className="h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
             disabled={isPlayingAudio || submitStatus === "submitting"}
@@ -247,7 +247,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
             style={buttonStyle}
           />
           <button
-            onClick={handleSubmit}
+            onClickCapture={handleSubmit}
             className={getSubmitButtonClass()}
             disabled={submitStatus === "submitting"}
           >
