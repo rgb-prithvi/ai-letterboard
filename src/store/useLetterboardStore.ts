@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { fetchWordSet } from "@/lib/word-selection";
 import { DEFAULT_VOICE_ID } from "@/lib/constants";
 import { logInteraction } from "@/lib/log-interaction";
+import debounce from "lodash/debounce";
+import { supabase } from "@/lib/supabase";
 
 interface WordSets {
   [key: string]: string[];
@@ -29,6 +31,7 @@ interface LetterboardStore {
   playAudio: (text: string) => Promise<void>;
   userId: string | null;
   setUserId: (id: string | null) => void;
+  fetchPredictions: (query: string) => Promise<void>;
 }
 
 const useLetterboardStore = create<LetterboardStore>((set, get) => ({
@@ -100,18 +103,10 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     }),
   setCurrentWordSet: (name) => set({ currentWordSet: name }),
   generatePredictions: () => {
-    const { text, wordSets, currentWordSet } = get();
+    const { text } = get();
     const words = text.split(" ");
     const currentWord = words[words.length - 1].toLowerCase();
-
-    const currentSetWords = wordSets[currentWordSet] || [];
-
-    const predictions = currentSetWords
-      .filter((word) => word.toLowerCase().startsWith(currentWord))
-      .sort((a, b) => a.length - b.length)
-      .slice(0, 5);
-
-    set({ predictions });
+    get().fetchPredictions(currentWord);
   },
   setSelectedWords: (words) => set({ selectedWords: words }),
   toggleBoard: () => set((state) => ({ isLetterBoard: !state.isLetterBoard })),
@@ -153,6 +148,35 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     }
   },
   setUserId: (id: string | null) => set({ userId: id }),
+  fetchPredictions: debounce(async (query: string) => {
+    const { userId } = get();
+    if (!userId || query.length === 0) {
+      set({ predictions: [] });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("words")
+        .select("word")
+        .in('word_bank_id', (sb) =>
+          sb.from('word_banks')
+            .select('id')
+            .eq('user_id', userId)
+        )
+        .ilike("word", `%${query}%`)
+        .order("word", { ascending: true })
+        .limit(5);
+
+      if (error) throw error;
+
+      const predictions = data.map((item) => item.word);
+      set({ predictions });
+    } catch (error) {
+      console.error("Error fetching predictions:", error);
+      set({ predictions: [] });
+    }
+  }, 300), // 300ms debounce
 }));
 
 export default useLetterboardStore;
