@@ -141,14 +141,28 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
 
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
+      
+      // Create a new Audio element
+      const audio = new Audio();
+      
+      // Set up event listeners
+      audio.addEventListener('canplaythrough', () => {
+        audio.play().catch(e => console.error("Playback failed:", e));
+      });
 
-      await audio.play();
-
-      // Clean up the object URL after playback
-      audio.onended = () => {
+      audio.addEventListener('ended', () => {
         URL.revokeObjectURL(audioUrl);
-      };
+      });
+
+      audio.addEventListener('error', (e) => {
+        console.error("Audio playback error:", e);
+        URL.revokeObjectURL(audioUrl);
+      });
+
+      // Set the source and load the audio
+      audio.src = audioUrl;
+      audio.load();
+
     } catch (error) {
       console.error("Error playing audio:", error);
       // You might want to add some user-facing error handling here
