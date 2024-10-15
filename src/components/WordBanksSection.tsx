@@ -109,7 +109,10 @@ export function WordBanksSection() {
 
       const { data: insertedWords, error: wordsError } = await supabase
         .from("words")
-        .insert(wordsToInsert)
+        .upsert(wordsToInsert, {
+          onConflict: "word_bank_id,word",
+          ignoreDuplicates: true,
+        })
         .select();
 
       if (wordsError) {
@@ -169,7 +172,10 @@ export function WordBanksSection() {
 
     const { data: insertedWords, error: insertError } = await supabase
       .from("words")
-      .insert(wordsToInsert)
+      .upsert(wordsToInsert, {
+        onConflict: "word_bank_id,word",
+        ignoreDuplicates: true,
+      })
       .select();
 
     if (insertError) {
