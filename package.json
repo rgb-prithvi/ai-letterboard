@@ -37,6 +37,8 @@
     "next": "14.2.14",
     "next-auth": "^4.24.8",
     "openai": "^4.67.3",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0",
     "play-sound": "^1.1.6",
     "posthog-js": "^1.167.0",
     "prettier": "^3.3.3",

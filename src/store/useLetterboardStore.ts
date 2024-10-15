@@ -53,11 +53,8 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     });
 
     if (letter === " " || letter === "." || letter === "!" || letter === "?") {
-      const { currentSentence, playAudio } = get();
-      await playAudio(currentSentence.trim());
+      const { currentSentence } = get();
       set({ currentSentence: "" });
-    } else {
-      await get().playAudio(letter);
     }
   },
   backspace: async () => {
@@ -128,37 +125,32 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
     if (userId) {
       await logInteraction("word_spoken", text, userId);
     }
-    const response = await fetch("/api/tts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice_id: DEFAULT_VOICE_ID }),
-    });
 
-    if (!response.ok) {
-      console.error("TTS request failed");
-      return;
-    }
+    try {
+      const response = await fetch(`/api/tts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voice_id: DEFAULT_VOICE_ID }),
+      });
 
-    const reader = response.body?.getReader();
-    if (!reader) return;
+      if (!response.ok) {
+        throw new Error(`TTS request failed: ${response.statusText}`);
+      }
 
-    const audio = new Audio();
-    audio.src = URL.createObjectURL(new Blob([], { type: "audio/mpeg" }));
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
 
-    const pump = async () => {
-      const { done, value } = await reader.read();
-      if (done) return;
-
-      const blob = new Blob([value], { type: "audio/mpeg" });
-      const url = URL.createObjectURL(blob);
-      audio.src = url;
       await audio.play();
 
-      URL.revokeObjectURL(url);
-      await pump();
-    };
-
-    await pump();
+      // Clean up the object URL after playback
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+      };
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      // You might want to add some user-facing error handling here
+    }
   },
   setUserId: (id: string | null) => set({ userId: id }),
 }));

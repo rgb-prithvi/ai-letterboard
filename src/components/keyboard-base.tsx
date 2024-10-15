@@ -3,7 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Eraser, Check, Loader2, ArrowBigUpDash, Volume2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Eraser,
+  Check,
+  Loader2,
+  ArrowBigUpDash,
+  Volume2,
+  CornerDownLeft,
+} from "lucide-react";
 import useLetterboardStore from "@/store/useLetterboardStore";
 import { logInteraction } from "@/lib/log-interaction";
 import { UserSettings } from "@/lib/types";
@@ -42,6 +50,17 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">(
     "idle",
   );
+  const [isNumericKeys, setIsNumericKeys] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+
+  const numericKeys = [
+    ["1", "2", "3"],
+    ["4", "5", "6"],
+    ["7", "8", "9"],
+    ["0", "+", "-"],
+    ["*", "/", "%"],
+    ["(", ")", "."],
+  ];
 
   useEffect(() => {
     initializeWordSet();
@@ -105,6 +124,55 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
 
   const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
 
+  const onNumericKeyToggle = () => {
+    setIsNumericKeys(!isNumericKeys);
+  };
+
+  // TODO: Lot of code duplication...refactor to clean this all up
+  const renderNumericKeys = () => {
+    const keys = numericKeys;
+
+    const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
+
+    return (
+      <div className="flex flex-col h-full">
+        {keys.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex justify-between mb-2 flex-1">
+            {row.map((key) => (
+              <button
+                key={key}
+                onClick={() =>
+                  appendLetter(
+                    userSettings.letterCase === "uppercase" ? key.toUpperCase() : key.toLowerCase(),
+                  )
+                }
+                className={`flex-1 mx-0.5 rounded-lg shadow flex items-center justify-center h-full ${fontClass}`}
+                style={{
+                  backgroundColor: userSettings.buttonColor,
+                  color: userSettings.textColor,
+                  fontSize: `${userSettings.fontSize}px`,
+                }}
+              >
+                {userSettings.letterCase === "uppercase" ? key.toUpperCase() : key.toLowerCase()}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const handlePlayAudio = async () => {
+    setIsPlayingAudio(true);
+    try {
+      await playAudio(text);
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    } finally {
+      setIsPlayingAudio(false);
+    }
+  };
+
   return (
     <>
       <div className="h-36 lg:h-48 p-4">
@@ -112,7 +180,10 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           value={text}
           readOnly
           className={`w-full h-full p-8 border border-gray-300 rounded resize-none ${fontClass}`}
-          style={{ fontSize: `${userSettings.fontSize * 1.2}px` }}
+          style={{
+            fontSize: `${userSettings.fontSize * 1.2}px`,
+            lineHeight: "1.1", // Add this line
+          }}
         />
       </div>
       <div className="flex-shrink-0 p-2 bg-gray-200">
@@ -130,18 +201,18 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           </div>
         )}
       </div>
-      <div className="flex-grow px-4">{renderKeys()}</div>
+      <div className="flex-grow px-4">{isNumericKeys ? renderNumericKeys() : renderKeys()}</div>
       <div className="my-4 px-4">
         <div className="grid grid-cols-4 gap-2">
           <button
-            onClick={() => console.log("Caps Lock")}
+            onClick={() => appendLetter("\n")}
             className="h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
           >
-            <ArrowBigUpDash size={18} />
+            <CornerDownLeft size={18} />
           </button>
           <button
-            onClick={onToggleBoard}
+            onClick={onNumericKeyToggle}
             className="h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
           >
@@ -155,13 +226,15 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
             <Eraser size={18} />
           </button>
           <button
-            onClick={() => {
-              console.log("Speak");
-            }}
+            onClick={handlePlayAudio}
             className="h-10 rounded-lg shadow flex items-center justify-center bg-white"
-            disabled={submitStatus === "submitting"}
+            disabled={isPlayingAudio || submitStatus === "submitting"}
           >
-            <Volume2 size={18} />
+            {isPlayingAudio ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <Volume2 size={18} />
+            )}
           </button>
           <button
             onClick={backspace}
