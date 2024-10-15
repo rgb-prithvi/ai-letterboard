@@ -118,7 +118,7 @@ export function GenerateBankModal({ isOpen, onClose, onCreateBank }: GenerateBan
               <Slider
                 id="word-count"
                 min={5}
-                max={100}
+                max={60}
                 step={1}
                 value={[wordCount]}
                 onValueChange={(value) => setWordCount(value[0])}
