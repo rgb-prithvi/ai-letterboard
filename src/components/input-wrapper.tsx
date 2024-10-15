@@ -23,7 +23,7 @@ const InputWrapper: React.FC<InputWrapperProps> = ({ userSettings }) => {
   };
 
   return (
-    <div className={`flex flex-col h-[90vh] ${fontClass}`} style={keyboardStyle}>
+    <div className={`flex flex-col flex-grow ${fontClass}`} style={keyboardStyle}>
       {userSettings.inputMode === "word" ? (
         <WordBoard userSettings={userSettings} />
       ) : (

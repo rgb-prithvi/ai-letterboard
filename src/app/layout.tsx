@@ -8,15 +8,18 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: "Letterboard",
   description: "AI-powered letterboard app",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: true,
+    viewportFit: "cover",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full">
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0"
-      />
+    <html lang="en">
       <body className="flex flex-col h-full">
         <NextAuthProvider>
           <CSPostHogProvider>
