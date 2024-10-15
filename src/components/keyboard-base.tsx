@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Eraser, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Eraser, Check, Loader2, ArrowBigUpDash, Volume2 } from "lucide-react";
 import useLetterboardStore from "@/store/useLetterboardStore";
 import { logInteraction } from "@/lib/log-interaction";
 import { UserSettings } from "@/lib/types";
@@ -131,32 +131,50 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
         )}
       </div>
       <div className="flex-grow px-4">{renderKeys()}</div>
-      <div className="mt-2 space-y-2 h-24 px-4">
-        <div className="flex gap-2">
+      <div className="my-4 px-4">
+        <div className="grid grid-cols-4 gap-2">
+          <button
+            onClick={() => console.log("Caps Lock")}
+            className="h-10 rounded-lg shadow flex items-center justify-center"
+            style={buttonStyle}
+          >
+            <ArrowBigUpDash size={18} />
+          </button>
+          <button
+            onClick={onToggleBoard}
+            className="h-10 rounded-lg shadow flex items-center justify-center"
+            style={buttonStyle}
+          >
+            <p className="text-lg">123</p>
+          </button>
+          <button
+            onClick={clear}
+            className="h-10 rounded-lg shadow flex items-center justify-center"
+            style={buttonStyle}
+          >
+            <Eraser size={18} />
+          </button>
+          <button
+            onClick={() => {
+              console.log("Speak");
+            }}
+            className="h-10 rounded-lg shadow flex items-center justify-center bg-white"
+            disabled={submitStatus === "submitting"}
+          >
+            <Volume2 size={18} />
+          </button>
           <button
             onClick={backspace}
-            className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
+            className="h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
           >
             <ArrowLeft size={18} />
           </button>
           <button
-            onClick={clear}
-            className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
+            onClick={() => appendLetter(" ")}
+            className="col-span-2 h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
-          >
-            <Eraser size={18} />
-          </button>
-          {isLetterBoard && (
-            <button
-              onClick={onToggleBoard}
-              className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
-              style={buttonStyle}
-            >
-              123
-            </button>
-          )}
-          {extraButtons}
+          />
           <button
             onClick={handleSubmit}
             className={getSubmitButtonClass()}
@@ -165,11 +183,6 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
             {getSubmitButtonContent()}
           </button>
         </div>
-        <button
-          onClick={() => appendLetter(" ")}
-          className="w-full h-10 rounded-lg shadow flex items-center justify-center"
-          style={buttonStyle}
-        />
       </div>
     </>
   );

@@ -97,23 +97,12 @@ const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
     );
   };
 
-  return (
+  return isLoading ? (
+    <Skeleton className="w-full h-full" />
+  ) : (
     <KeyboardBase
       renderKeys={renderKeys}
       onSubmit={(text) => console.log(text)}
-      extraButtons={
-        <button
-          onClick={refreshWords}
-          className={`flex-1 h-10 rounded-lg shadow flex items-center justify-center ${fonts[userSettings.font as keyof typeof fonts]?.className || ""}`}
-          style={{
-            backgroundColor: userSettings.buttonColor,
-            color: userSettings.textColor,
-          }}
-          disabled={isLoading}
-        >
-          <RotateCcw size={20} />
-        </button>
-      }
       isLetterBoard={false}
       onToggleBoard={() => {}}
       userSettings={userSettings}
