@@ -204,7 +204,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
         />
       </div>
       {userSettings.autoCompletion && (
-        <div className="flex-shrink-0 p-2 h-16 mb-4">
+        <div className="flex-shrink-0 p-2 min-h-16 mb-4">
           <div className="flex justify-center space-x-2 my-1">
             {predictions.map((prediction, index) => (
               <button
