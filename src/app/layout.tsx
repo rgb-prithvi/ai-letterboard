@@ -13,11 +13,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0"
+      />
       <body className="flex flex-col h-full">
         <NextAuthProvider>
           <CSPostHogProvider>
             <TopBar />
-            <main className="flex-1 overflow-hidden">{children}</main>
+            <main className="flex-1">{children}</main>
           </CSPostHogProvider>
         </NextAuthProvider>
         <Toaster />
