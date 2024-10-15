@@ -82,7 +82,7 @@ export function AuthScreen() {
       </div>
       <div className="hidden bg-muted lg:block">
         <Image
-          src="/welcome-image-2.avif"
+          src="/Typewriter-1.jpg"
           alt="Image"
           width="1920"
           height="1080"
