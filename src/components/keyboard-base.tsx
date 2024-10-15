@@ -70,7 +70,9 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   const handleSubmit = async () => {
     setSubmitStatus("submitting");
     try {
-      await playAudio(text);
+      if (userSettings.textToSpeech) {
+        await playAudio(text);
+      }
       if (session?.user?.id) {
         await logInteraction("text_submit", text.trim(), session.user.id);
       }
@@ -209,7 +211,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
             className="h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
           >
-            <p className="text-lg">123</p>
+            <p className="text-lg">{isNumericKeys ? "ABC" : "123"}</p>
           </button>
           <button
             onClick={clear}

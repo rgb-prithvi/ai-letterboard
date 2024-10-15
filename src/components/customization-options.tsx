@@ -134,7 +134,7 @@ export function CustomizationOptions() {
         <CardDescription>Customize your input experience</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label>Input Mode</Label>
           <RadioGroup
             value={userSettings.inputMode}
@@ -150,7 +150,7 @@ export function CustomizationOptions() {
               <Label htmlFor="word">Word Mode</Label>
             </div>
           </RadioGroup>
-        </div>
+        </div> */}
 
         <div className="flex items-center justify-between">
           <Label htmlFor="text-to-speech">Text to speech</Label>
