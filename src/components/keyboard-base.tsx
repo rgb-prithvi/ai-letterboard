@@ -183,8 +183,8 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           }}
         />
       </div>
-      <div className="flex-shrink-0 p-2 h-16 mb-4">
-        {userSettings.autoCompletion && (
+      {userSettings.autoCompletion && (
+        <div className="flex-shrink-0 p-2 h-16 mb-4">
           <div className="flex justify-center space-x-2 my-1">
             {predictions.map((prediction, index) => (
               <button
@@ -196,8 +196,8 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
               </button>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
       <div className="flex-grow px-4">{isNumericKeys ? renderNumericKeys() : renderKeys()}</div>
       <div className="my-4 px-4">
         <div className="grid grid-cols-4 gap-2">
@@ -224,7 +224,8 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           </button>
           <button
             onClick={handlePlayAudio}
-            className="h-10 rounded-lg shadow flex items-center justify-center bg-white"
+            className="h-10 rounded-lg shadow flex items-center justify-center"
+            style={buttonStyle}
             disabled={isPlayingAudio || submitStatus === "submitting"}
           >
             {isPlayingAudio ? (

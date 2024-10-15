@@ -8,9 +8,9 @@ export const defaultSettings = {
   buttonColor: "#ffffff",
   letterCase: "uppercase",
   textColor: "#000000",
-  textToSpeech: false,
+  textToSpeech: true,
   keyboardDelay: 0,
-  autoCompletion: false,
+  autoCompletion: true,
   keyboardLayout: "abcd",
 };
 
