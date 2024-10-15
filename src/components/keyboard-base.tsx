@@ -17,6 +17,7 @@ import { logInteraction } from "@/lib/log-interaction";
 import { UserSettings } from "@/lib/types";
 import { fonts } from "@/lib/fonts";
 import { playAudio } from "@/lib/audio-utils";
+import { Howler } from 'howler';
 
 interface KeyboardBaseProps {
   renderKeys: () => React.ReactNode;
@@ -52,7 +53,6 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   );
   const [isNumericKeys, setIsNumericKeys] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
   const numericKeys = [
     ["1", "2", "3"],
@@ -70,19 +70,6 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
       fetchUserWordBankIds();
     }
   }, [session]);
-
-  useEffect(() => {
-    // Initialize AudioContext on component mount
-    const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-    setAudioContext(context);
-
-    // Cleanup function to close AudioContext on unmount
-    return () => {
-      if (context.state !== 'closed') {
-        context.close();
-      }
-    };
-  }, []);
 
   const handleSubmit = async () => {
     setSubmitStatus("submitting");
@@ -175,13 +162,6 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   };
 
   const handlePlayAudio = async () => {
-    if (!audioContext) return;
-
-    // Resume AudioContext if it's in suspended state
-    if (audioContext.state === 'suspended') {
-      await audioContext.resume();
-    }
-
     setIsPlayingAudio(true);
     try {
       await playAudio(text, userId);

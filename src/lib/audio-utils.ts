@@ -1,6 +1,7 @@
 import audioData from "./conversation-output.json";
 import { DEFAULT_VOICE_ID } from "@/lib/constants";
 import { logInteraction } from "./log-interaction";
+import { Howl } from 'howler';
 
 const SAMPLE_RATE = 24000; // Matching the sample rate from play-audio.js
 
@@ -57,24 +58,31 @@ export async function playAudio(text: string, userId: string | null): Promise<vo
     const audioBlob = await response.blob();
     const audioUrl = URL.createObjectURL(audioBlob);
 
-    const audio = new Audio(audioUrl);
+    return new Promise((resolve, reject) => {
+      const sound = new Howl({
+        src: [audioUrl],
+        format: ['mp3'],
+        html5: true,
+        onend: () => {
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        },
+        onloaderror: (id, error) => {
+          URL.revokeObjectURL(audioUrl);
+          reject(new Error(`Error loading audio: ${error}`));
+        },
+        onplayerror: (id, error) => {
+          URL.revokeObjectURL(audioUrl);
+          reject(new Error(`Error playing audio: ${error}`));
+        }
+      });
 
-    await new Promise((resolve, reject) => {
-      audio.oncanplaythrough = () => {
-        audio.play()
-          .then(resolve)
-          .catch(reject);
-      };
-      audio.onerror = reject;
+      sound.play();
     });
-
-    audio.onended = () => {
-      URL.revokeObjectURL(audioUrl);
-    };
 
   } catch (error) {
     console.error("Error playing audio:", error);
-    throw error; // Re-throw the error to be handled by the caller
+    throw error;
   }
 }
 
