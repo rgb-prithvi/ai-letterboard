@@ -18,14 +18,16 @@ export function WordBankReview({
   onEditWord,
 }: WordBankReviewProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingWord, setEditingWord] = useState("");
 
   const handleEditWord = (index: number) => {
     setEditingIndex(index);
+    setEditingWord(words[index].word);
   };
 
-  const handleSaveEdit = (index: number, newWord: string) => {
-    if (newWord.trim() !== "") {
-      onEditWord(index, newWord.trim());
+  const handleSaveEdit = (index: number) => {
+    if (editingWord.trim() !== "") {
+      onEditWord(index, editingWord.trim());
       setEditingIndex(null);
     }
   };
@@ -41,11 +43,8 @@ export function WordBankReview({
           <div key={index} className="flex items-center justify-between py-1">
             {editingIndex === index ? (
               <Input
-                value={word.word}
-                onChange={(e) => handleSaveEdit(index, e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Enter" && handleSaveEdit(index, (e.target as HTMLInputElement).value)
-                }
+                value={editingWord}
+                onChange={(e) => setEditingWord(e.target.value)}
                 className="flex-grow mr-2"
               />
             ) : (
@@ -63,7 +62,7 @@ export function WordBankReview({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleSaveEdit(index, word.word)}
+                  onClick={() => handleSaveEdit(index)}
                 >
                   Save
                 </Button>

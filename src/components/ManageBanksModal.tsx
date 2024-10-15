@@ -105,7 +105,9 @@ export function ManageBanksModal({
               onRemoveWord={handleRemoveWord}
               onEditWord={handleEditWord}
             />
-            <Button onClick={handleSave}>Save Changes</Button>
+            <div className="flex justify-end">
+              <Button onClick={handleSave}>Save Changes</Button>
+            </div>
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
