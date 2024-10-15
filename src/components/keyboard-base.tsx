@@ -52,6 +52,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   );
   const [isNumericKeys, setIsNumericKeys] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
   const numericKeys = [
     ["1", "2", "3"],
@@ -69,6 +70,19 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
       fetchUserWordBankIds();
     }
   }, [session]);
+
+  useEffect(() => {
+    // Initialize AudioContext on component mount
+    const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+    setAudioContext(context);
+
+    // Cleanup function to close AudioContext on unmount
+    return () => {
+      if (context.state !== 'closed') {
+        context.close();
+      }
+    };
+  }, []);
 
   const handleSubmit = async () => {
     setSubmitStatus("submitting");
@@ -161,6 +175,13 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   };
 
   const handlePlayAudio = async () => {
+    if (!audioContext) return;
+
+    // Resume AudioContext if it's in suspended state
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+
     setIsPlayingAudio(true);
     try {
       await playAudio(text, userId);
@@ -224,7 +245,7 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
             <Eraser size={18} />
           </button>
           <button
-            onClickCapture={handlePlayAudio}
+            onClick={handlePlayAudio}
             className="h-10 rounded-lg shadow flex items-center justify-center"
             style={buttonStyle}
             disabled={isPlayingAudio || submitStatus === "submitting"}

@@ -38,7 +38,7 @@ export function playAudioBuffer(audioContext: AudioContext, buffer: AudioBuffer)
   return source;
 }
 
-export async function playAudio(text: string, userId: string | null) {
+export async function playAudio(text: string, userId: string | null): Promise<void> {
   if (userId) {
     await logInteraction("word_spoken", text, userId);
   }
@@ -57,26 +57,24 @@ export async function playAudio(text: string, userId: string | null) {
     const audioBlob = await response.blob();
     const audioUrl = URL.createObjectURL(audioBlob);
 
-    const audio = new Audio();
+    const audio = new Audio(audioUrl);
 
-    audio.addEventListener("canplaythrough", () => {
-      audio.play().catch((e) => console.error("Playback failed:", e));
+    await new Promise((resolve, reject) => {
+      audio.oncanplaythrough = () => {
+        audio.play()
+          .then(resolve)
+          .catch(reject);
+      };
+      audio.onerror = reject;
     });
 
-    audio.addEventListener("ended", () => {
+    audio.onended = () => {
       URL.revokeObjectURL(audioUrl);
-    });
+    };
 
-    audio.addEventListener("error", (e) => {
-      console.error("Audio playback error:", e);
-      URL.revokeObjectURL(audioUrl);
-    });
-
-    audio.src = audioUrl;
-    audio.load();
   } catch (error) {
     console.error("Error playing audio:", error);
-    // You might want to add some user-facing error handling here
+    throw error; // Re-throw the error to be handled by the caller
   }
 }
 
