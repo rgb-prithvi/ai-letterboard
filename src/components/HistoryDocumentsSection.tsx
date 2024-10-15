@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,11 +69,63 @@ export function HistoryDocumentsSection() {
   };
 
   const copyToClipboard = (content: string) => {
-    navigator.clipboard.writeText(content).then(() => {
-      toast({
-        title: "Copied to clipboard",
-        description: "The text has been copied to your clipboard.",
-      });
+    if (navigator.clipboard && window.isSecureContext) {
+      // For modern browsers and secure contexts
+      navigator.clipboard.writeText(content)
+        .then(() => {
+          showCopySuccessToast();
+        })
+        .catch((err) => {
+          console.error("Failed to copy: ", err);
+          fallbackCopyTextToClipboard(content);
+        });
+    } else {
+      // Fallback for older browsers and non-secure contexts
+      fallbackCopyTextToClipboard(content);
+    }
+  };
+
+  const fallbackCopyTextToClipboard = (text: string) => {
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = text;
+    tempElement.style.position = 'absolute';
+    tempElement.style.left = '-9999px';
+    document.body.appendChild(tempElement);
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(tempElement);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showCopySuccessToast();
+      } else {
+        showCopyFailureToast();
+      }
+    } catch (err) {
+      console.error("Fallback: Oops, unable to copy", err);
+      showCopyFailureToast();
+    }
+
+    selection?.removeAllRanges();
+    document.body.removeChild(tempElement);
+  };
+
+  const showCopySuccessToast = () => {
+    toast({
+      title: "Copied to clipboard",
+      description: "The text has been copied to your clipboard.",
+    });
+  };
+
+  const showCopyFailureToast = () => {
+    toast({
+      title: "Copy failed",
+      description: "Unable to copy text. Please try again or copy manually.",
+      variant: "destructive",
     });
   };
 
