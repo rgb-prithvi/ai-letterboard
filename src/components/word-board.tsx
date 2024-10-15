@@ -102,7 +102,6 @@ const WordBoard: React.FC<WordBoardProps> = ({ userSettings }) => {
   ) : (
     <KeyboardBase
       renderKeys={renderKeys}
-      onSubmit={(text) => console.log(text)}
       isLetterBoard={false}
       onToggleBoard={() => {}}
       userSettings={userSettings}

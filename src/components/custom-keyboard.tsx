@@ -82,7 +82,6 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSett
   return (
     <KeyboardBase 
       renderKeys={renderKeys} 
-      onSubmit={handleSubmit} 
       isLetterBoard={isLetterBoard}
       onToggleBoard={toggleBoard}
       userSettings={userSettings}

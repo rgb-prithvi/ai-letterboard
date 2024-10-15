@@ -19,7 +19,6 @@ import { fonts } from "@/lib/fonts";
 
 interface KeyboardBaseProps {
   renderKeys: () => React.ReactNode;
-  onSubmit: (text: string) => void;
   extraButtons?: React.ReactNode;
   isLetterBoard: boolean;
   onToggleBoard: () => void;
@@ -28,7 +27,6 @@ interface KeyboardBaseProps {
 
 const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   renderKeys,
-  onSubmit,
   extraButtons,
   isLetterBoard,
   onToggleBoard,
@@ -70,23 +68,18 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
   }, [session]);
 
   const handleSubmit = async () => {
-    if (text.trim()) {
-      setSubmitStatus("submitting");
-      if (userSettings.textToSpeech) {
-        try {
-          await playAudio(text.trim());
-          if (session?.user?.id) {
-            await logInteraction("text_submit", text.trim(), session.user.id);
-          }
-          onSubmit(text);
-          setSubmitStatus("success");
-        } catch (error) {
-          console.error("Error submitting text:", error);
-          setSubmitStatus("error");
-        } finally {
-          setTimeout(() => setSubmitStatus("idle"), 2000); // Reset status after 2 seconds
-        }
+    setSubmitStatus("submitting");
+    try {
+      await playAudio(text);
+      if (session?.user?.id) {
+        await logInteraction("text_submit", text.trim(), session.user.id);
       }
+      setSubmitStatus("success");
+    } catch (error) {
+      console.error("Error submitting text:", error);
+      setSubmitStatus("error");
+    } finally {
+      setTimeout(() => setSubmitStatus("idle"), 2000); // Reset status after 2 seconds
     }
   };
 
