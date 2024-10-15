@@ -5,6 +5,7 @@ import WordBoard from "@/components/word-board";
 import CustomKeyboard from "@/components/custom-keyboard";
 import { UserSettings } from "@/lib/types";
 import useLetterboardStore from "@/store/useLetterboardStore";
+import { fonts } from "@/lib/fonts";
 
 interface InputWrapperProps {
   userSettings: UserSettings;
@@ -13,10 +14,22 @@ interface InputWrapperProps {
 const InputWrapper: React.FC<InputWrapperProps> = ({ userSettings }) => {
   const isLetterBoard = useLetterboardStore((state) => state.isLetterBoard);
 
-  return userSettings.inputMode === "word" ? (
-    <WordBoard userSettings={userSettings} />
-  ) : (
-    <CustomKeyboard isLetterBoard={isLetterBoard} userSettings={userSettings} />
+  const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
+
+  const keyboardStyle = {
+    fontSize: `${userSettings.fontSize}px`,
+    color: userSettings.textColor,
+    backgroundColor: userSettings.theme === "light" ? "#f3f4f6" : "#1f2937",
+  };
+
+  return (
+    <div className={`flex flex-col h-[90vh] ${fontClass}`} style={keyboardStyle}>
+      {userSettings.inputMode === "word" ? (
+        <WordBoard userSettings={userSettings} />
+      ) : (
+        <CustomKeyboard isLetterBoard={isLetterBoard} userSettings={userSettings} />
+      )}
+    </div>
   );
 };
 

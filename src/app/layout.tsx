@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NextAuthProvider>
           <CSPostHogProvider>
             <TopBar />
-            <main className="flex-1">{children}</main>
+            {children}
           </CSPostHogProvider>
         </NextAuthProvider>
         <Toaster />

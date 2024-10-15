@@ -71,14 +71,6 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     }
   };
 
-  const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
-
-  const keyboardStyle = {
-    fontSize: `${userSettings.fontSize}px`,
-    color: userSettings.textColor,
-    backgroundColor: userSettings.theme === "light" ? "#f3f4f6" : "#1f2937",
-  };
-
   const buttonStyle = {
     backgroundColor: userSettings.buttonColor,
     color: userSettings.textColor,
@@ -111,9 +103,11 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
     }
   };
 
+  const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
+
   return (
-    <div className={`flex flex-col h-screen ${fontClass}`} style={keyboardStyle}>
-      <div className="h-36 p-4">
+    <>
+      <div className="h-[30vh] lg:h-[40vh] p-4">
         <Textarea
           value={text}
           readOnly
@@ -121,70 +115,63 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           style={{ fontSize: `${userSettings.fontSize * 1.2}px` }}
         />
       </div>
-      <div>
-        <div className="flex-shrink-0 p-2 bg-gray-200">
-          {userSettings.autoCompletion && (
-            <div className="flex justify-center space-x-2 my-1">
-              {predictions.map((prediction, index) => (
-                <button
-                  key={index}
-                  onClick={() => selectPrediction(prediction)}
-                  className="px-4 py-2 text-sm bg-white rounded-lg shadow"
-                >
-                  {prediction}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <div
-          className="flex flex-col flex-grow p-2 h-full"
-          style={{ backgroundColor: userSettings.theme === "light" ? "#e5e7eb" : "#374151" }}
-        >
-          <div className="flex-grow">{renderKeys()}</div>
-          <div className="mt-2 space-y-2 h-24">
-            <div className="flex gap-2">
+      <div className="flex-shrink-0 p-2 bg-gray-200">
+        {userSettings.autoCompletion && (
+          <div className="flex justify-center space-x-2 my-1">
+            {predictions.map((prediction, index) => (
               <button
-                onClick={backspace}
-                className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
-                style={buttonStyle}
+                key={index}
+                onClick={() => selectPrediction(prediction)}
+                className="px-4 py-2 text-sm bg-white rounded-lg shadow"
               >
-                <ArrowLeft size={18} />
+                {prediction}
               </button>
-              <button
-                onClick={clear}
-                className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
-                style={buttonStyle}
-              >
-                <Eraser size={18} />
-              </button>
-              {isLetterBoard && (
-                <button
-                  onClick={onToggleBoard}
-                  className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
-                  style={buttonStyle}
-                >
-                  123
-                </button>
-              )}
-              {extraButtons}
-              <button
-                onClick={handleSubmit}
-                className={getSubmitButtonClass()}
-                disabled={submitStatus === "submitting"}
-              >
-                {getSubmitButtonContent()}
-              </button>
-            </div>
-            <button
-              onClick={() => appendLetter(" ")}
-              className="w-full h-10 rounded-lg shadow flex items-center justify-center"
-              style={buttonStyle}
-            />
+            ))}
           </div>
-        </div>
+        )}
       </div>
-    </div>
+      <div className="flex-grow px-4">{renderKeys()}</div>
+      <div className="mt-2 space-y-2 h-24 px-4">
+        <div className="flex gap-2">
+          <button
+            onClick={backspace}
+            className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
+            style={buttonStyle}
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <button
+            onClick={clear}
+            className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
+            style={buttonStyle}
+          >
+            <Eraser size={18} />
+          </button>
+          {isLetterBoard && (
+            <button
+              onClick={onToggleBoard}
+              className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
+              style={buttonStyle}
+            >
+              123
+            </button>
+          )}
+          {extraButtons}
+          <button
+            onClick={handleSubmit}
+            className={getSubmitButtonClass()}
+            disabled={submitStatus === "submitting"}
+          >
+            {getSubmitButtonContent()}
+          </button>
+        </div>
+        <button
+          onClick={() => appendLetter(" ")}
+          className="w-full h-10 rounded-lg shadow flex items-center justify-center"
+          style={buttonStyle}
+        />
+      </div>
+    </>
   );
 };
 
