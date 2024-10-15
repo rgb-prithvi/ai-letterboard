@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import KeyboardBase from "./keyboard-base";
 import useLetterboardStore from "@/store/useLetterboardStore";
 import { UserSettings } from "@/lib/types";
@@ -12,7 +12,13 @@ interface CustomKeyboardProps {
 }
 
 const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSettings }) => {
-  const { appendLetter, toggleBoard } = useLetterboardStore();
+  const { appendLetter, toggleBoard, setUserSettings } = useLetterboardStore();
+
+  // Set user settings when the component mounts or when userSettings change
+  useEffect(() => {
+    setUserSettings(userSettings);
+    console.log("Settings set", userSettings);
+  }, [userSettings, setUserSettings]);
 
   const abcdKeys = [
     ["A", "B", "C", "D", "E"],
@@ -48,7 +54,7 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSett
       keys = userSettings.keyboardLayout === "qwerty" ? qwertyKeys : abcdKeys;
     }
 
-    const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || '';
+    const fontClass = fonts[userSettings.font as keyof typeof fonts]?.className || "";
 
     return (
       <div className="flex flex-col h-full">
@@ -57,7 +63,11 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSett
             {row.map((key) => (
               <button
                 key={key}
-                onClick={() => appendLetter(userSettings.letterCase === "uppercase" ? key.toUpperCase() : key.toLowerCase())}
+                onClick={() =>
+                  appendLetter(
+                    userSettings.letterCase === "uppercase" ? key.toUpperCase() : key.toLowerCase(),
+                  )
+                }
                 className={`flex-1 mx-0.5 rounded-lg shadow flex items-center justify-center h-full ${fontClass}`}
                 style={{
                   backgroundColor: userSettings.buttonColor,
@@ -80,8 +90,8 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({ isLetterBoard, userSett
   };
 
   return (
-    <KeyboardBase 
-      renderKeys={renderKeys} 
+    <KeyboardBase
+      renderKeys={renderKeys}
       isLetterBoard={isLetterBoard}
       onToggleBoard={toggleBoard}
       userSettings={userSettings}

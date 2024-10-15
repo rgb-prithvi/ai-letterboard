@@ -4,6 +4,7 @@ import { DEFAULT_VOICE_ID } from "@/lib/constants";
 import { logInteraction } from "@/lib/log-interaction";
 import debounce from "lodash/debounce";
 import { supabase } from "@/lib/supabase";
+import { UserSettings } from "@/lib/types";
 
 interface WordSets {
   [key: string]: string[];
@@ -34,6 +35,8 @@ interface LetterboardStore {
   fetchPredictions: (query: string) => Promise<void>;
   userWordBankIds: number[];
   fetchUserWordBankIds: () => Promise<void>;
+  userSettings: UserSettings;
+  setUserSettings: (settings: UserSettings) => void;
 }
 
 const useLetterboardStore = create<LetterboardStore>((set, get) => ({
@@ -46,6 +49,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   currentSentence: "",
   userId: null,
   userWordBankIds: [],
+  userSettings: {} as UserSettings, // Initialize with empty object
   appendLetter: async (letter: string) => {
     const { userId } = get();
     if (userId) {
@@ -152,24 +156,31 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
   },
   setUserId: (id: string | null) => set({ userId: id }),
   fetchPredictions: debounce(async (query: string) => {
-    const { userId, userWordBankIds } = get();
-    if (!userId || query.length === 0 || userWordBankIds.length === 0) {
+    const { userId, userWordBankIds, userSettings } = get();
+    if (!userId || query.length === 0) {
       set({ predictions: [] });
       return;
     }
+
+    const COMMON_WORD_BANK_ID = 28;
+    const wordBankIds = [...userWordBankIds, COMMON_WORD_BANK_ID];
 
     try {
       const { data, error } = await supabase
         .from("words")
         .select("word")
-        .in("word_bank_id", userWordBankIds)
+        .in("word_bank_id", wordBankIds)
         .ilike("word", `${query}%`)
         .order("word", { ascending: true })
         .limit(5);
 
       if (error) throw error;
 
-      const predictions = data.map((item) => item.word);
+      const predictions = data.map((item) => {
+        const word = item.word;
+        return userSettings.letterCase === "uppercase" ? word.toUpperCase() : word.toLowerCase();
+      });
+
       set({ predictions });
     } catch (error) {
       console.error("Error fetching predictions:", error);
@@ -191,6 +202,7 @@ const useLetterboardStore = create<LetterboardStore>((set, get) => ({
       console.error("Error fetching user word bank IDs:", error);
     }
   },
+  setUserSettings: (settings: UserSettings) => set({ userSettings: settings }),
 }));
 
 export default useLetterboardStore;
