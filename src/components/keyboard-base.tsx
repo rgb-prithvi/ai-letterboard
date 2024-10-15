@@ -121,65 +121,67 @@ const KeyboardBase: React.FC<KeyboardBaseProps> = ({
           style={{ fontSize: `${userSettings.fontSize * 1.5}px` }}
         />
       </div>
-      <div className="flex-shrink-0 p-2 bg-gray-200">
-        {userSettings.autoCompletion && (
-          <div className="flex justify-center space-x-2">
-            {predictions.map((prediction, index) => (
+      <div className="h-[80vh]">
+        <div className="flex-shrink-0 p-2 bg-gray-200">
+          {userSettings.autoCompletion && (
+            <div className="flex justify-center space-x-2 my-1">
+              {predictions.map((prediction, index) => (
+                <button
+                  key={index}
+                  onClick={() => selectPrediction(prediction)}
+                  className="px-4 py-2 text-sm bg-white rounded-lg shadow"
+                >
+                  {prediction}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div
+          className="flex flex-col flex-grow p-2 h-full"
+          style={{ backgroundColor: userSettings.theme === "light" ? "#e5e7eb" : "#374151" }}
+        >
+          <div className="flex-grow overflow-y-auto">{renderKeys()}</div>
+          <div className="mt-2 space-y-2">
+            <div className="flex gap-2">
               <button
-                key={index}
-                onClick={() => selectPrediction(prediction)}
-                className="px-3 py-1 text-sm bg-white rounded-lg shadow"
-              >
-                {prediction}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-      <div
-        className="flex flex-col flex-grow p-2"
-        style={{ backgroundColor: userSettings.theme === "light" ? "#e5e7eb" : "#374151" }}
-      >
-        <div className="flex-grow overflow-y-auto">{renderKeys()}</div>
-        <div className="mt-2 space-y-2 h-40">
-          <div className="flex gap-2">
-            <button
-              onClick={backspace}
-              className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
-              style={buttonStyle}
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <button
-              onClick={clear}
-              className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
-              style={buttonStyle}
-            >
-              <Eraser size={18} />
-            </button>
-            {isLetterBoard && (
-              <button
-                onClick={onToggleBoard}
+                onClick={backspace}
                 className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
                 style={buttonStyle}
               >
-                123
+                <ArrowLeft size={18} />
               </button>
-            )}
-            {extraButtons}
+              <button
+                onClick={clear}
+                className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
+                style={buttonStyle}
+              >
+                <Eraser size={18} />
+              </button>
+              {isLetterBoard && (
+                <button
+                  onClick={onToggleBoard}
+                  className="flex-1 h-10 rounded-lg shadow flex items-center justify-center"
+                  style={buttonStyle}
+                >
+                  123
+                </button>
+              )}
+              {extraButtons}
+              <button
+                onClick={handleSubmit}
+                className={getSubmitButtonClass()}
+                disabled={submitStatus === "submitting"}
+              >
+                {getSubmitButtonContent()}
+              </button>
+            </div>
             <button
-              onClick={handleSubmit}
-              className={getSubmitButtonClass()}
-              disabled={submitStatus === "submitting"}
-            >
-              {getSubmitButtonContent()}
-            </button>
+              onClick={() => appendLetter(" ")}
+              className="w-full h-10 rounded-lg shadow flex items-center justify-center"
+              style={buttonStyle}
+            />
           </div>
-          <button
-            onClick={() => appendLetter(" ")}
-            className="w-full h-10 rounded-lg shadow flex items-center justify-center"
-            style={buttonStyle}
-          />
         </div>
       </div>
     </div>

@@ -34,8 +34,8 @@ function getCommonWordsList(): string[] {
 
 function generateWordBoard(
   wordBank: Word[],
-  limit: number = 30,
-  numCommonWords: number = 20,
+  limit: number = 20,
+  numCommonWords: number = 10,
 ): string[] {
   const commonWordsList = commonWords
     .sort((a, b) => parseInt(a.rank) - parseInt(b.rank))
@@ -63,8 +63,8 @@ function generateWordBoard(
 }
 
 export async function fetchAndGenerateWordBoard(
-  limit: number = 30,
-  numCommonWords: number = 20,
+  limit: number = 20,
+  numCommonWords: number = 10,
 ): Promise<string[]> {
   const wordBank = await fetchWordBank();
   return generateWordBoard(wordBank, limit, numCommonWords);

@@ -45,9 +45,6 @@ export function TopBarComponent() {
           <Button variant="ghost" size="icon" onClick={() => setIsWordBanksOpen(true)}>
             <BookOpen className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setIsUserSettingsOpen(true)}>
-            <User className="h-5 w-5" />
-          </Button>
           <Button variant="ghost" size="icon" onClick={handleIconClick}>
             {pathname === "/" ? <Settings className="h-5 w-5" /> : <Keyboard className="h-5 w-5" />}
           </Button>
