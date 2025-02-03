@@ -18,6 +18,10 @@ The impact of AAC tools can be transformative - I've witnessed firsthand how acc
 - **Customizable Interface**: Personalize the look and feel to match user preferences
 - **Accessibility-First Design**: Built following WCAG guidelines
 
+## Data Model
+
+![Data Model](./Data-Model.png)
+
 ## 🚀 Live Demo
 
 [Try the app](https://your-demo-url.com) | [Watch Demo Video](your-video-url)
