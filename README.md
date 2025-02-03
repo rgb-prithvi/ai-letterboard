@@ -20,7 +20,22 @@ The impact of AAC tools can be transformative - I've witnessed firsthand how acc
 
 ## Data Model
 
-![Data Model](./Data-Model.png)
+![Data Model](./readme-images/Data-Model.png)
+
+## ✨ Key Features
+
+### Smart Communication Board
+![Communication Board](./readme-images/board-with-predictions.png)
+A simple, accessible keyboard interface with AI-powered text predictions. Users can type naturally while receiving intelligent word suggestions, making communication faster and more efficient. Integrated with ElevenLabs for natural-sounding text-to-speech output that moves beyond traditional robotic AAC voices.
+
+### AI-Generated Word Banks
+![Word Bank Generation I](./readme-images/generate-i.png)
+![Word Bank Generation II](./readme-images/generate-ii.png)
+Create specialized vocabulary sets using AI. Perfect for specific contexts like academic subjects or special interests. For example, if a user needs terminology for "Neuroscience 101", the system can generate and store relevant terms, ensuring text predictions are perfectly tuned to their unique communication needs.
+
+### Rich Customization
+![Customization Options](./readme-images/customization.png)
+Personalize every aspect of the interface to match individual preferences and needs. Adjust colors, layouts, and interaction styles to create the most comfortable and effective communication environment for each user.
 
 ## 🚀 Live Demo
 
