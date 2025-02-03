@@ -1,6 +1,6 @@
 # AI-Assisted Communication (AAC) App
 
-An innovative communication assistance tool designed to empower autistic individuals and people with speech difficulties. Built with Next.js 14, this project aims to make assisted communication more accessible, natural, and effective.
+An AI-enabled communication assistance tool designed to empower autistic individuals and people with speech difficulties. Built with Next.js 14, Supabase, ElevenLabs, OpenAI & Posthog. 
 
 ## 🌎 Background
 
@@ -55,7 +55,7 @@ Personalize every aspect of the interface to match individual preferences and ne
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/project-name.git
+git clone git@github.com:rgb-prithvi/ai-letterboard.git
 ```
 
 2. Install dependencies:
