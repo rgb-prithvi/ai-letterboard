@@ -17,15 +17,18 @@ An innovative communication assistance tool designed to empower autistic childre
 ## 💻 Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, TailwindCSS
+- **Backend**: Supabase + NextJS Server Actions & Edge Functions
+- **Authentication**: NextAuth
 - **AI Integration**: OpenAI API (GPT-4o mini)
 - **Voice Synthesis**: Eleven Labs API
 - **Deployment**: Vercel
+- **Analytics**: Posthog 
 
 ## 🛠️ Getting Started
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/project-name.git
+git clone https://github.com/rgb-prithvi/ai-letterboard.git
 ```
 
 2. Install dependencies:
