@@ -1,14 +1,22 @@
 # AI-Assisted Communication (AAC) App
 
-An innovative communication assistance tool designed to empower autistic children and individuals with speech difficulties. Built with Next.js 14, Vercel AI SDK, OpenAI & ElevenLabs.
+An innovative communication assistance tool designed to empower autistic individuals and people with speech difficulties. Built with Next.js 14, this project aims to make assisted communication more accessible, natural, and effective.
+
+## 🌎 Background
+
+This project was inspired by my younger brother, who is autistic and uses AAC (Augmentative and Alternative Communication) tools to communicate effectively. While exploring existing AAC solutions, I noticed that many were expensive and cumbersome to use. This motivated me to create a more accessible, user-friendly alternative that leverages modern AI technology to enhance the communication experience.
+
+The impact of AAC tools can be transformative - I've witnessed firsthand how access to better communication tools can help individuals progress academically and express themselves more fully. This project aims to make such tools more accessible to everyone who needs them.
 
 ## 🌟 Features
 
 - **Smart Letter Board**: Intuitive typing interface optimized for accessibility
-- **AI-Powered Word Prediction**: Contextual word suggestions using customized word banks
-- **Natural Text-to-Speech**: Integration with Eleven Labs for high-quality, natural-sounding voice output
-- **Easy Export**: Allows users to easily export their outputs as documents
-- **Accessibility-First Design**: Built with accessbility in mind
+- **Advanced Voice Synthesis**: Integration with Eleven Labs and OpenAI for natural-sounding speech output, moving beyond traditional robotic AAC voices
+- **Customizable Word Banks**: Parents can create topic-specific word banks (e.g., neuroscience terminology) for faster, more relevant communication
+- **Predictive Text**: AI-powered contextual word suggestions using customized word banks
+- **Document History**: Save and export conversations as PDFs for review and sharing
+- **Customizable Interface**: Personalize the look and feel to match user preferences
+- **Accessibility-First Design**: Built following WCAG guidelines
 
 ## 🚀 Live Demo
 
@@ -16,19 +24,19 @@ An innovative communication assistance tool designed to empower autistic childre
 
 ## 💻 Tech Stack
 
-- **Frontend**: Next.js 14, TypeScript, TailwindCSS
-- **Backend**: Supabase + NextJS Server Actions & Edge Functions
-- **Authentication**: NextAuth
-- **AI Integration**: OpenAI API (GPT-4o mini)
+- **Frontend**: Next.js 14, TypeScript, TailwindCSS, Zustand
+- **Backend**: Next.js API Routes, Server Actions
+- **Database**: Supabase with SDK
+- **AI Integration**: OpenAI API
 - **Voice Synthesis**: Eleven Labs API
+- **Analytics**: PostHog (User analytics + Session replays)
 - **Deployment**: Vercel
-- **Analytics**: Posthog 
 
 ## 🛠️ Getting Started
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/rgb-prithvi/ai-letterboard.git
+git clone https://github.com/yourusername/project-name.git
 ```
 
 2. Install dependencies:
@@ -51,12 +59,6 @@ yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
-
-
-
-## 📬 Contact
-
-For questions or feedback, please [open an issue](https://github.com/rgb-prithvi/ai-letterboard/issues).
 
 ---
 Built with ❤️ for accessibility and inclusion
