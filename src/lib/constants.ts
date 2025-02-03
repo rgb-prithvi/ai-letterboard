@@ -48,4 +48,4 @@ export const commonWords: CommonWord[] = [
 ];
 
 export const ELEVENLABS_API_KEY = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || "";
-export const DEFAULT_VOICE_ID = "D4MpD0Mi4O2qLZb4h0eC";
+export const DEFAULT_VOICE_ID = "ErXwobaYiN019PkySvjV";
